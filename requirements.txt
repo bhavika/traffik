@@ -7,3 +7,6 @@ torch-sparse==0.6.8
 torch-spline-conv==1.2.0
 torchaudio==0.7.2
 torchvision==0.8.2+cpu
+pytest
+wandb
+boto3
