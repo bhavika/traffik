@@ -3,17 +3,20 @@ SHELL ["/bin/bash", "-c"]
 
 ENV AWS_REGION="us-east-1"
 ENV USE_GPU=1
+ENV DEBIAN_FRONTEND=noninteractive
 
 USER root
-RUN apt update
-RUN apt-get install -y build-essential
-RUN apt-get install -y libglib2.0-0
-RUN apt-get install -y vim
+RUN apt update && apt-get install -y build-essential libglib2.0-0
 
 WORKDIR /app
 RUN conda create -n venv python=3.8
 RUN source activate venv
 RUN conda install pytorch torchvision torchaudio cudatoolkit=10.2 -c pytorch
+
+RUN TORCH_VERSION=$(python -c "import torch; print(torch.__version__)")
+RUN CUDA_VERSION=$(python -c "import torch; print(torch.version.cuda)")
+ENV TORCH_VERSION=$TORCH_VERSION
+ENV CUDA_VERSION=$CUDA_VERSION
 
 COPY src /app/src
 COPY setup.py /app/setup.py
