@@ -1,12 +1,6 @@
 h5py==3.1.0
-torchaudio==0.7.2
-torchvision==0.8.2+cpu
 pytest
 wandb
 boto3
 spotty
-torch-scatter -f https://pytorch-geometric.com/whl/torch-1.7.1+cu102.html
-torch-sparse -f https://pytorch-geometric.com/whl/torch-1.7.1+cu102.html
-torch-cluster -f https://pytorch-geometric.com/whl/torch-1.7.1+cu102.html
-torch-spline-conv -f https://pytorch-geometric.com/whl/torch-1.7.1+cu102.html
 torch-geometric
