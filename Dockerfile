@@ -18,15 +18,15 @@ RUN CUDA_VERSION=$(python -c "import torch; print(torch.version.cuda)")
 ENV TORCH_VERSION=$TORCH_VERSION
 ENV CUDA_VERSION=$CUDA_VERSION
 
-COPY src /app/src
-COPY setup.py /app/setup.py
 COPY requirements.txt /app/requirements.txt
 
-RUN pip install torch-scatter torch-sparse torch-cluster torch-spline-conv  -f https://pytorch-geometric.com/whl/torch-${TORCH_VERSION}+cu102.html
+RUN pip install torch-scatter torch-sparse torch-cluster torch-spline-conv -f https://pytorch-geometric.com/whl/torch-${TORCH_VERSION}+cu102.html && pip install -r /app/requirements.txt
 
 RUN mkdir models
 RUN mkdir output
 
-RUN pip install -r /app/requirements.txt
+COPY src /app/src
+COPY setup.py /app/setup.py
+
 RUN pip install .
 ENV LC_ALL=C.UTF-8 LANG=C.UTF-8
