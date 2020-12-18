@@ -1,5 +1,5 @@
 project:
-  name: traffik
+  name: traffik-spot
   syncFilters:
     - exclude:
       - .git/*
@@ -13,14 +13,14 @@ containers:
       - containerPort: 8888
         hostPort: 8888
     volumeMounts:
-      - name: workspace
-        mountPath: /workspace
+      - name: data
+        mountPath: /data
 
 instances:
   - name: aws-1
     provider: aws
     parameters:
-      region: eu-west-1
+      region: us-east-1
       instanceType: p2.xlarge
       ports: [8888]
       volumes:
@@ -29,5 +29,7 @@ instances:
             size: 50
 
 scripts:
+  download:
+    aws s3 sync s3://traffik/berlin /workspace/data/berlin
   train: |
     make hello
