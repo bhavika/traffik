@@ -1,5 +1,5 @@
 name: AWS ECR
-on: [push, pull_request]
+on: [push]
 jobs:
     build-and-push:
       runs-on: ubuntu-latest
