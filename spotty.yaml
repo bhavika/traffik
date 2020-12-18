@@ -5,10 +5,11 @@ project:
       - .git/*
       - .idea/*
       - '*/__pycache__/*'
+      - venv/*
 
 containers:
   - projectDir: /workspace/traffik
-    image: traffik
+    image: ${AWS_ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com/traffik:latest
     ports:
       - containerPort: 8888
         hostPort: 8888
