@@ -1,4 +1,4 @@
-- run: docker build --tag traffik:latest .
+- run: docker build -t traffik:latest .
 - name: Push to ECR
   id: ecr
   uses: jwalton/gh-ecr-push@v1
@@ -6,4 +6,4 @@
     access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
     secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
     region: us-east-1
-    image: traffik:latest
+    image: 'traffik:latest'
