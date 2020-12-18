@@ -1,9 +1,15 @@
-name: Push to ECR
-run: docker build -t traffik:latest .
-  id: ecr
-  uses: jwalton/gh-ecr-push@v1.0.0
-  with:
-    access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-    secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-    region: us-east-1
-    image: 'traffik:latest'
+- name: AWS ECR
+  uses: kciter/aws-ecr-action@v1
+  jobs:
+    build-and-push:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: kciter/aws-ecr-action@master
+          with:
+            access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            account_id: ${{ secrets.AWS_ACCOUNT_ID }}
+            repo: bhavika/traffik
+            region: us-east-1
+            tags: latest,${{ github.sha }}
+            create_repo: false
