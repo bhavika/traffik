@@ -1,5 +1,5 @@
-- name: Push to ECR
-- run: docker build -t traffik:latest .
+name: Push to ECR
+run: docker build -t traffik:latest .
   id: ecr
   uses: jwalton/gh-ecr-push@v1.0.0
   with:
