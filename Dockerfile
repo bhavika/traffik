@@ -1,4 +1,4 @@
-FROM anibali/pytorch:latest
+FROM anibali/pytorch:1.7.0-cuda11.0-ubuntu20.04
 SHELL ["/bin/bash", "-c"]
 
 ENV AWS_REGION="us-east-1"
@@ -12,15 +12,9 @@ WORKDIR /app
 RUN conda create -n venv python=3.8
 RUN source activate venv
 
-RUN TORCH_VERSION=$(python -c "import torch; print(torch.__version__)")
-RUN CUDA_VERSION=$(python -c "import torch; print(torch.version.cuda)")
-ENV CUDA_VERSION=$CUDA_VERSION
-ENV TORCH_VERSION=$TORCH_VERSION
-RUN ECHO $CUDA_VERSION
-
 COPY requirements.txt /app/requirements.txt
 
-RUN sudo -H pip install torch-scatter torch-sparse torch-cluster torch-spline-conv -f https://pytorch-geometric.com/whl/torch-${TORCH_VERSION}+cu${CUDA_VERSION//./}.html -r /app/requirements.txt
+RUN pip install torch-scatter torch-sparse torch-cluster torch-spline-conv -f https://pytorch-geometric.com/whl/torch-1.7.0+cu110.html -r /app/requirements.txt
 
 RUN mkdir models
 RUN mkdir output
