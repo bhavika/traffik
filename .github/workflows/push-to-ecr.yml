@@ -1,6 +1,6 @@
-- name: AWS ECR
-  uses: kciter/aws-ecr-action@v1
-  jobs:
+name: AWS ECR
+uses: kciter/aws-ecr-action@v1
+jobs:
     build-and-push:
       runs-on: ubuntu-latest
       steps:
