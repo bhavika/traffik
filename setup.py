@@ -1,6 +1,5 @@
 from setuptools import setup, find_packages
 
-# Parse the version from the module.
 version = "0.0.1"
 
 with open('requirements.txt') as f:
@@ -18,6 +17,6 @@ setup(
     packages=find_packages(),
     exclude_package_data={'': ['data/*']},
     zip_safe=False,
-    install_requires=requirements.append('drivendata-submission-validator'),
-    extras_require={"test": ["pytest"]},
+    install_requires=requirements,
+    extras_require={"test": ["pytest", "black"]},
 )

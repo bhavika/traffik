@@ -22,5 +22,5 @@ RUN mkdir output
 COPY src /app/src
 COPY setup.py /app/setup.py
 
-RUN sudo -H pip install .
+RUN pip install .
 ENV LC_ALL=C.UTF-8 LANG=C.UTF-8
