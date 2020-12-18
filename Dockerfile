@@ -22,6 +22,8 @@ COPY src /app/src
 COPY setup.py /app/setup.py
 COPY requirements.txt /app/requirements.txt
 
+RUN pip install torch-scatter torch-sparse torch-cluster torch-spline-conv  -f https://pytorch-geometric.com/whl/torch-${TORCH_VERSION}+cu102.html
+
 RUN mkdir models
 RUN mkdir output
 

@@ -5,8 +5,4 @@ pytest
 wandb
 boto3
 spotty
-torch-scatter -f https://pytorch-geometric.com/whl/torch-1.7.1+cu102.html
-torch-sparse -f https://pytorch-geometric.com/whl/torch-1.7.1+cu102.html
-torch-cluster -f https://pytorch-geometric.com/whl/torch-1.7.1+cu102.html
-torch-spline-conv -f https://pytorch-geometric.com/whl/torch-1.7.1+cu102.html
 torch-geometric
