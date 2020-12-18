@@ -1,5 +1,4 @@
 name: AWS ECR
-uses: kciter/aws-ecr-action@v1
 on: [push, pull_request]
 jobs:
     build-and-push:
