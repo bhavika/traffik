@@ -1,0 +1,33 @@
+project:
+  name: traffik
+  syncFilters:
+    - exclude:
+      - .git/*
+      - .idea/*
+      - '*/__pycache__/*'
+
+containers:
+  - projectDir: /workspace/traffik
+    image: traffik
+    ports:
+      - containerPort: 8888
+        hostPort: 8888
+    volumeMounts:
+      - name: workspace
+        mountPath: /workspace
+
+instances:
+  - name: aws-1
+    provider: aws
+    parameters:
+      region: eu-west-1
+      instanceType: p2.xlarge
+      ports: [8888]
+      volumes:
+        - name: workspace
+          parameters:
+            size: 50
+
+scripts:
+  train: |
+    make hello
