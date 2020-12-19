@@ -2,13 +2,13 @@ from unittest import TestCase
 import pytest
 from click.testing import CliRunner
 import click
-from traffik.scripts import cli, validate_cityname
+from traffik.scripts import process, validate_cityname
 
 
 class TestConsole(TestCase):
     def test_basic(self):
         runner = CliRunner()
-        result = runner.invoke(cli, ["process", "--city", "berlin"])
+        result = runner.invoke(process, ["--city", "berlin"])
         print(result)
         assert result.exit_code == 0
 

@@ -21,7 +21,7 @@ def cli(ctx):
     ctx.obj = {}
 
 
-@cli.command()
+@cli.command("process")
 @click.option(
     "--city", callback=validate_cityname, help="The city dataset to be processed."
 )
