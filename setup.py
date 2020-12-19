@@ -6,7 +6,7 @@ with open("traffik/__init__.py") as f:
             version = line.split("=")[1].strip().strip('"').strip("'")
             continue
 
-with open('requirements.txt') as f:
+with open("requirements.txt") as f:
     requirements = f.read().splitlines()
 
 setup(
@@ -19,10 +19,10 @@ setup(
     url="https://github.com/bhavika/traffik",
     license="BSD",
     packages=find_packages(),
-    exclude_package_data={'': ['data/*']},
+    exclude_package_data={"": ["data/*"]},
     zip_safe=False,
     install_requires=requirements,
-    extras_require={"test": ["pytest", "black", "pre-commit"]},
+    extras_require={"test": ["pytest", "pytest-mock", "black", "pre-commit"]},
     entry_points="""
       [console_scripts]
       traffik=traffik.scripts:cli
