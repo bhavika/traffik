@@ -4,3 +4,5 @@ wandb
 boto3
 spotty
 torch-geometric
+python-dotenv
+click
