@@ -9,7 +9,6 @@ class TestConsole(TestCase):
     def test_basic(self):
         runner = CliRunner()
         result = runner.invoke(process, ["--city", "berlin"])
-        print(result)
         assert result.exit_code == 0
 
     def test_validate_cityname(self):
