@@ -35,6 +35,6 @@ instances:
 
 scripts:
   download:
-    aws s3 sync s3://traffik/berlin /workspace/data/berlin
+    aws s3 sync s3://trafik/berlin /workspace/data/berlin
   train: |
     make hello
