@@ -4,10 +4,13 @@ import traffik.config as config
 from traffik.graph_dataset import build_graph
 
 
-def validate_cityname(ctx, param, value):
-    if not value.lower() in config.CITIES:
+def validate_cityname(
+    ctx: click.core.Context, param: click.core.Parameter, value: str
+) -> str:
+    if value.lower() in config.CITIES:
+        return value
+    else:
         raise click.BadParameter("Should be a valid city dataset")
-    return value
 
 
 @click.group(help="Command line interface for the traffik Python package.")
