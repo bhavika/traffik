@@ -23,11 +23,15 @@ instances:
     parameters:
       region: us-east-1
       instanceType: p2.xlarge
+      spotInstance: true
       ports: [8888]
+      managedPolicyArns: [arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess]
       volumes:
         - name: workspace
           parameters:
             size: 50
+      commands: |
+        $(aws ecr get-login --no-include-email --region us-east-1)
 
 scripts:
   download:
