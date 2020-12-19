@@ -19,4 +19,4 @@ def build_graph(city):
     edge_handle = os.path.join(config.PROCESSED_DIR, city, f"{city}_edges_5.npy")
 
     for mode in [config.TRAINING_DIR, config.VALIDATION_DIR, config.TESTING_DIR]:
-        logger.msg("Starting:", mode=mode)
+        logger.msg("Start building graph dataset for", city=city, mode=mode)

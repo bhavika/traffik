@@ -7,6 +7,6 @@ def timestamper(_, __, event_dict):
     return event_dict
 
 
-structlog.configure(processors=[timestamper, structlog.processors.KeyValueRenderer()])
+structlog.configure(processors=[timestamper, structlog.processors.JSONRenderer()])
 
 logger = structlog.get_logger()

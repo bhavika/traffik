@@ -13,7 +13,7 @@ setup(
     name="traffik",
     version=version,
     description=u"Experimenting with traffic data, mobility, graph nets",
-    keywords="",
+    keywords="machine learning, deep learning, traffic",
     author=u"Bhavika Tekwani",
     author_email="bhavicka@protonmail.com",
     url="https://github.com/bhavika/traffik",
@@ -22,5 +22,9 @@ setup(
     exclude_package_data={'': ['data/*']},
     zip_safe=False,
     install_requires=requirements,
-    extras_require={"test": ["pytest", "black"]},
+    extras_require={"test": ["pytest", "black", "pre-commit"]},
+    entry_points="""
+      [console_scripts]
+      traffik=traffik.scripts:cli
+      """,
 )

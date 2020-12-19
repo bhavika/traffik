@@ -14,7 +14,7 @@ def validate_cityname(ctx, param, value):
 @click.version_option(version=traffik.__version__, message="%(version)s")
 @click.pass_context
 def cli(ctx):
-    """Execute the main mercantile command"""
+    """Execute the main traffik command"""
     ctx.obj = {}
 
 
