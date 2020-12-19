@@ -6,3 +6,4 @@ spotty
 torch-geometric
 python-dotenv
 click
+structlog

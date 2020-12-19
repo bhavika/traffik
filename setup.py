@@ -1,6 +1,10 @@
 from setuptools import setup, find_packages
 
-version = "0.0.1"
+with open("traffik/__init__.py") as f:
+    for line in f:
+        if "__version__" in line:
+            version = line.split("=")[1].strip().strip('"').strip("'")
+            continue
 
 with open('requirements.txt') as f:
     requirements = f.read().splitlines()

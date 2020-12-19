@@ -19,7 +19,7 @@ RUN pip install torch-scatter torch-sparse torch-cluster torch-spline-conv -f ht
 RUN mkdir models
 RUN mkdir output
 
-COPY src /app/src
+COPY traffik /app/src
 COPY setup.py /app/setup.py
 
 RUN pip install .
