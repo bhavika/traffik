@@ -27,3 +27,11 @@ def cli(ctx):
 )
 def process(city):
     build_graph(city)
+
+
+@cli.command("train")
+@click.option(
+    "--city", callback=validate_cityname, help="The city dataset to be trained on."
+)
+def train(city):
+    pass

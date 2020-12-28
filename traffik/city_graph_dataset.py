@@ -138,26 +138,6 @@ class CityGraphDataset(Dataset):
             return data, y_image, y_zeros, torch.tensor(fileId), torch.tensor(dayId)
         return data
 
-    def get_fileId_sliceno_dayid(self, idx, overlap, debug=False):
-        fileId, sliceNo = divmod(
-            idx + 1 + self.data_slice_per_file, self.data_slice_per_file
-        )
-        fileId = fileId - 1
-        if debug:
-            print(f"orig file id: {fileId}")
-            print(f"orig slice no: {sliceNo}")
-        if sliceNo == 0:
-            fileId = fileId - 1
-            sliceNo = self.data_slice_per_file
-            if debug:
-                print(f"mod file id: {fileId}")
-                print(f"mod slice no: {sliceNo}")
-        if overlap:
-            dayId = sliceNo + self.window - 1
-        else:
-            dayId = self.window + (sliceNo - 1) * self.total_window
-        return fileId, sliceNo, dayId
-
     def add_static_data(self, slice_data, static_data):
         return np.concatenate([slice_data, static_data], axis=1)
 
@@ -212,10 +192,3 @@ class CityGraphDataset(Dataset):
         slice_data = self.process_slice(slice_window_label)
         slice_data = torch.tensor(slice_data, dtype=torch.float)
         return slice_data
-
-    def convert_graph_minibatch_y_to_image(self, graph_y, image_zeros):
-        # graph_y=graph_y.reshape(-1,len(self.node_coords), 8, len(self.forward_steps))
-        graph_y = graph_y.reshape(-1, len(self.node_coords), 8, 12)
-        graph_y = graph_y.permute(0, 3, 1, 2)
-        image_zeros[:, :, self.node_coords[:, 0], self.node_coords[:, 1], :] = graph_y
-        return image_zeros
