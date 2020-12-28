@@ -7,6 +7,8 @@ from traffik.logger import logger
 
 
 def setup(city: str):
+    logger.msg("Setting up processed directory for", city=city)
+
     output_path = os.path.join(os.getenv("DATA_DIR"), config.PROCESSED_DIR)
 
     if not os.path.exists(output_path):
