@@ -6,21 +6,22 @@ import torch
 import math
 from traffik.logger import logger
 import traffik.config as config
+from typing import List
 
 
 class CityGraphDataset(Dataset):
     def __init__(
         self,
-        raw_dir,
-        base_dir,
-        city,
-        forward_mins,
-        window=12,
-        mode="training",
-        overlap=True,
-        normalize=None,
-        full_val=False,
-        pca_static=False,
+        raw_dir: str,
+        base_dir: str,
+        city: str,
+        forward_mins: List,
+        window: int = 12,
+        mode: str = "training",
+        overlap: bool = True,
+        normalize: str = None,
+        full_val: bool = False,
+        pca_static: bool = False,
     ):
         self.window = window
         self.forward_mins = forward_mins
@@ -95,11 +96,11 @@ class CityGraphDataset(Dataset):
     def __len__(self):
         return self.len
 
-    def set_subset_len(self, subset_len):
+    def set_subset_len(self, subset_len: int):
         self.len = subset_len
         self.scale = math.floor(self.total_length / self.len)
 
-    def get(self, idx, debug=False):
+    def get(self, idx, debug:bool=False):
         idx = self.scale * idx
         fileId = self.idxs[idx, 0]
         dayId = self.idxs[idx, 1] + 12
@@ -159,7 +160,7 @@ class CityGraphDataset(Dataset):
         s = s.reshape(len(self.node_coords), -1)
         return s
 
-    def get_training_data(self, full_data, static_data, window=12, slice_id=None):
+    def get_training_data(self, full_data, static_data, window:int = 12, slice_id=None):
         slice_window = full_data
         no_timesteps = slice_window.shape[0]
         assert (

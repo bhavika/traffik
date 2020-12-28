@@ -94,16 +94,16 @@ def splice_test_tensor(input_file, channel, output_file):
 )
 @click.option("--input_file", "-i")
 @click.option("--channel", "-c", multiple=True)
-@click.option("--output_file", "-o")
+@click.option("--output_dir", "-s")
 @click.option("--factor", "-f")
-def tc2i(input_file, channel, output_file, factor):
+def tc2i(input_file, channel, output_dir, factor):
     channel = int(channel[0])
-    factor = int(factor)
+    if factor: factor = int(factor)
     data = load_h5_file(input_file)
     for i in range(data.shape[0]):
         d = np.clip(data[i, :, :, channel] * factor, 0, 255).astype("uint8")
         img = Image.fromarray(d)
-        name = output_file + "_" + "{:03d}".format(i) + ".png"
+        name = output_dir + "_" + "{:03d}".format(i) + ".png"
         img.save(name)
         print("image {0} written".format(name))
 
