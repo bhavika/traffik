@@ -11,8 +11,8 @@ import traffik.config as config
 class CityGraphDataset(Dataset):
     def __init__(
         self,
-        source_dir,
-        dest_dir,
+        raw_dir,
+        base_dir,
         city,
         forward_mins,
         window=12,
@@ -26,12 +26,12 @@ class CityGraphDataset(Dataset):
         self.forward_mins = forward_mins
         self.mode = mode
         self.full_val = full_val
-        self.city_dir = os.path.join(source_dir, city)
+        self.city_dir = os.path.join(raw_dir, city)
 
-        if source_dir is None:
+        if base_dir is None:
             self.data_dir = city
         else:
-            self.data_dir = os.path.join(source_dir, city)
+            self.data_dir = os.path.join(base_dir, city)
         self.data_file = os.path.join(self.data_dir, f"{city}_{mode}_5.h5")
         self.file_list = list(h5py.File(self.data_file, "r").keys())
         self.overlap = overlap
@@ -125,7 +125,7 @@ class CityGraphDataset(Dataset):
         y = self.get_label_data(label_data, dayId, self.forward_steps)
         data = Data(x=x, y=y, edge_index=self.edges)
 
-        if (self.mode == "validation") & self.full_val:
+        if self.mode == "validation" and self.full_val:
             val_file = os.path.join(self.raw_dir, "validation", self.file_list[fileId])
             with h5py.File(val_file, "r") as fr:
                 y_image = fr[list(fr.keys())[0]][

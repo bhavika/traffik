@@ -22,7 +22,7 @@ setup(
     exclude_package_data={"": ["data/*"]},
     zip_safe=False,
     install_requires=requirements,
-    extras_require={"test": ["pytest", "pytest-mock", "black", "pre-commit"]},
+    extras_require={"test": ["pytest", "mock", "black", "pre-commit"]},
     entry_points="""
       [console_scripts]
       traffik=traffik.scripts:cli
