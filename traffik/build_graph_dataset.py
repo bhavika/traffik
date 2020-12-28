@@ -29,7 +29,6 @@ def build_graph(city: str):
 
     for mode in [config.TRAINING_DIR, config.VALIDATION_DIR, config.TESTING_DIR]:
         logger.msg("Start building graph dataset for", city=city, mode=mode)
-
         raw_data = os.path.join(os.getenv("DATA_DIR"), city, mode)
 
         hf_handle = h5py.File(
@@ -38,7 +37,7 @@ def build_graph(city: str):
 
         for f in os.listdir(raw_data):
             reader = h5py.File(os.path.join(raw_data, f), "r")
-            data = reader[list(reader.keys())[0]]
+            data = reader[list(reader.keys())[0]]  # key is 'array'
             if mode == config.TESTING_DIR:
                 graph_data = np.array(data)[:, :, nodes[:, 0], nodes[:, 1], :]
             else:
