@@ -1,7 +1,7 @@
 import click
 import traffik
 import traffik.config as config
-from traffik.graph_dataset import build_graph
+from traffik.build_graph_dataset import build_graph
 
 
 def validate_cityname(
