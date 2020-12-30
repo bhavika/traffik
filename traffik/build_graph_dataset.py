@@ -79,9 +79,6 @@ def get_road_network(source_dir: str, image_size: List, testing: bool, data_type
             d_max = np.array(data).reshape(-1, 495, 436).sum(0)
             grid += d_max
         logger.info(
-            f"[get_road_network] This slice size {(d_max > 0.1).sum() / (495 * 436)} of image"
-        )
-        logger.info(
             f"[get_road_network] Current size {(grid > 0.1).sum() / (495 * 436)} of image"
         )
     return grid
@@ -89,9 +86,11 @@ def get_road_network(source_dir: str, image_size: List, testing: bool, data_type
 
 def process_grid(
     city: str, image_size: List, mode: str, data_type: str, save: bool = True
-):
+) -> np.array:
     grid_handle = os.path.join(
-        os.getenv('DATA_DIR'), config.INTERMEDIATE_DIR, f"{city}_{mode}_roads_{data_type}.npy"
+        os.getenv("DATA_DIR"),
+        config.INTERMEDIATE_DIR,
+        f"{city}_{mode}_roads_{data_type}.npy",
     )
 
     source_dir = os.path.join(os.getenv("DATA_DIR"), city, mode)
@@ -118,7 +117,11 @@ def process_grid(
     return grid
 
 
-def combine_grids(city, train_grid, validation_grid, test_grid, data_type, save=True):
+def combine_grids(city, train_grid, validation_grid, test_grid, data_type, save=True) -> np.array:
+    """
+    Combines the training, validation and test grids into one grid.
+    :return:
+    """
     grid = np.maximum(train_grid, validation_grid)
     grid = np.maximum(grid, test_grid)
 
@@ -130,20 +133,23 @@ def combine_grids(city, train_grid, validation_grid, test_grid, data_type, save=
             data_type=data_type,
             destination=fname,
         )
-        np.save(os.path.join(os.getenv('DATA_DIR'), config.INTERMEDIATE_DIR, fname), grid)
+        np.save(
+            os.path.join(os.getenv("DATA_DIR"), config.INTERMEDIATE_DIR, fname), grid
+        )
     return grid
 
 
 def build_static_grid(city: str, image_size: List, data_type: str):
     """
     Calculates overall max volume for each pixel across all channels.
-    :return:
     """
 
-    if not os.path.exists(os.path.join(os.getenv('DATA_DIR'), config.INTERMEDIATE_DIR)):
-        os.makedirs(os.path.join(os.getenv('DATA_DIR'), config.INTERMEDIATE_DIR))
+    if not os.path.exists(os.path.join(os.getenv("DATA_DIR"), config.INTERMEDIATE_DIR)):
+        os.makedirs(os.path.join(os.getenv("DATA_DIR"), config.INTERMEDIATE_DIR))
 
-    logger.info("[build_static_grid] Calculating and saving the road network for training data.")
+    logger.info(
+        "[build_static_grid] Calculating and saving the road network for training data."
+    )
 
     train_grid = process_grid(
         city, image_size, config.TRAINING_DIR, data_type, save=True
@@ -170,7 +176,9 @@ def build_static_grid(city: str, image_size: List, data_type: str):
         cover=road_percentage,
     )
 
-    logger.info("[build_static_grid] Combining train, validation and test grids into one.")
+    logger.info(
+        "[build_static_grid] Combining train, validation and test grids into one."
+    )
     combined_grid = combine_grids(
         city, train_grid, validation_grid, test_grid, data_type
     )
