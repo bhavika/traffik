@@ -2,14 +2,13 @@ import os
 import numpy as np
 import h5py
 from tqdm import tqdm
-from dotenv import load_dotenv
 import traffik.config as config
 from traffik.logger import logger
 from typing import List
 
 
 def setup(city: str):
-    logger.msg("Setting up processed directory for", city=city)
+    logger.info("Setting up processed directory for", city=city)
 
     output_path = os.path.join(os.getenv("DATA_DIR"), config.PROCESSED_DIR)
 
@@ -26,13 +25,11 @@ def setup(city: str):
 
 
 def build_graph(city: str):
-    load_dotenv(verbose=False)
-
     locations = setup(city)
     nodes = np.load(locations["node"])
 
     for mode in [config.TRAINING_DIR, config.VALIDATION_DIR, config.TESTING_DIR]:
-        logger.msg("Start building graph dataset for", city=city, mode=mode)
+        logger.debug("Start building graph dataset for", city=city, mode=mode)
         raw_data = os.path.join(os.getenv("DATA_DIR"), city, mode)
 
         hf_handle = h5py.File(
@@ -74,10 +71,10 @@ def get_road_network(source_dir: str, image_size: List, testing: bool, data_type
         else:
             d_max = np.array(data).reshape(-1, 495, 436).sum(0)
             grid += d_max
-        logger.msg(
+        logger.info(
             f"[get_road_network] This slice size {(d_max > 0.1).sum() / (495 * 436)} of image"
         )
-        logger.msg(
+        logger.info(
             f"[get_road_network] Current size {(grid > 0.1).sum() / (495 * 436)} of image"
         )
     return grid
@@ -89,12 +86,14 @@ def process_grid(
     grid_handle = os.path.join(
         config.INTERMEDIATE_DIR, f"{city}_{mode}_roads_{data_type}.npy"
     )
+
     source_dir = os.path.join(os.getenv("DATA_DIR"), city, mode)
 
     if os.path.isfile(grid_handle):
-        logger.msg("Reading existing grid file:", file=grid_handle)
+        logger.info("Reading existing grid file:", file=grid_handle)
         grid = np.load(grid_handle)
     else:
+        logger.info("Creating new road network grid file for", city=city, mode=mode, data_type=data_type)
         grid = get_road_network(source_dir, image_size, mode == "testing", data_type)
         if save:
             logger.info(
@@ -128,7 +127,7 @@ def build_static_grid(city: str, image_size: List, data_type: str):
     Calculates overall max volume for each pixel across all channels.
     :return:
     """
-    logger.msg("Calculating and saving the road network for training data.")
+    logger.info("Calculating and saving the road network for training data.")
 
     train_grid = process_grid(
         city, image_size, config.TRAINING_DIR, data_type, save=True
@@ -155,7 +154,7 @@ def build_static_grid(city: str, image_size: List, data_type: str):
         cover=road_percentage,
     )
 
-    logger.msg("Combining train, validation and test grids into one.")
+    logger.info("Combining train, validation and test grids into one.")
     combined_grid = combine_grids(
         city, train_grid, validation_grid, test_grid, data_type
     )

@@ -41,7 +41,7 @@ class CityGraphDataset(Dataset):
         self.normalize = normalize
         self.pca_static = pca_static
 
-        logger.msg("Normalizing by", normalize=normalize)
+        logger.debug("Normalizing by", normalize=normalize)
 
         if normalize == "active":
             with open(

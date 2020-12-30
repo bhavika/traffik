@@ -2,6 +2,7 @@ import click
 import traffik
 import traffik.config as config
 from traffik.build_graph_dataset import build_graph, build_static_grid
+from dotenv import load_dotenv
 
 
 def validate_cityname(
@@ -18,6 +19,7 @@ def validate_cityname(
 @click.pass_context
 def cli(ctx):
     """Execute the main traffik command"""
+    load_dotenv(verbose=False)
     ctx.obj = {}
 
 
@@ -33,9 +35,10 @@ def process(city):
 @click.option(
     "--city", callback=validate_cityname, help="The city dataset to be processed."
 )
-def make_static_grid(city):
+@click.option('--data-type', type=click.Choice([config.MAX_VOLUME, config.AVG_TOTAL_VOLUME], case_sensitive=False))
+def make_static_grid(city, data_type):
     image_size = [495, 436]
-    build_static_grid(city, image_size, config.MAX_VOLUME)
+    build_static_grid(city, image_size, data_type)
 
 
 @cli.command("train")
