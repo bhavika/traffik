@@ -1,0 +1,6 @@
+.env
+venv/
+*.pyc
+.git
+.pytest_cache/
+images/

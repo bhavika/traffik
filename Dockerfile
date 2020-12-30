@@ -19,8 +19,9 @@ RUN pip install torch-scatter torch-sparse torch-cluster torch-spline-conv -f ht
 RUN mkdir models
 RUN mkdir output
 
-COPY src /app/src
+COPY traffik /app/traffik
 COPY setup.py /app/setup.py
 
+WORKDIR /app
 RUN pip install .
 ENV LC_ALL=C.UTF-8 LANG=C.UTF-8

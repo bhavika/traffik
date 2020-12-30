@@ -1,6 +1,11 @@
 h5py==3.1.0
-pytest
+pytest~=6.2.1
 wandb
 boto3
 spotty
 torch-geometric
+python-dotenv~=0.15.0
+click~=7.1.2
+structlog~=20.1.0
+numpy~=1.19.4
+setuptools~=51.0.0
