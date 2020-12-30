@@ -1,7 +1,7 @@
 import click
 import traffik
 import traffik.config as config
-from traffik.build_graph_dataset import build_graph
+from traffik.build_graph_dataset import build_graph, build_static_grid
 
 
 def validate_cityname(
@@ -27,6 +27,15 @@ def cli(ctx):
 )
 def process(city):
     build_graph(city)
+
+
+@cli.command("static-grid")
+@click.option(
+    "--city", callback=validate_cityname, help="The city dataset to be processed."
+)
+def make_static_grid(city):
+    image_size = [495, 436]
+    build_static_grid(city, image_size, config.MAX_VOLUME)
 
 
 @cli.command("train")

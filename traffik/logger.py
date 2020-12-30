@@ -7,6 +7,15 @@ def timestamper(_, __, event_dict):
     return event_dict
 
 
-structlog.configure(processors=[timestamper, structlog.processors.JSONRenderer()])
+structlog.configure(
+    processors=[
+        timestamper,
+        structlog.add_logger_name,
+        structlog.add_log_level,
+        structlog.stdlib.PositionalArgumentsFormatter(),
+        structlog.processors.StackInfoRenderer(),
+        structlog.processors.JSONRenderer(),
+    ]
+)
 
 logger = structlog.get_logger()

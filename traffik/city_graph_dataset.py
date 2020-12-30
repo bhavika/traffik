@@ -100,7 +100,7 @@ class CityGraphDataset(Dataset):
         self.len = subset_len
         self.scale = math.floor(self.total_length / self.len)
 
-    def get(self, idx, debug:bool=False):
+    def get(self, idx, debug: bool = False):
         idx = self.scale * idx
         fileId = self.idxs[idx, 0]
         dayId = self.idxs[idx, 1] + 12
@@ -160,7 +160,9 @@ class CityGraphDataset(Dataset):
         s = s.reshape(len(self.node_coords), -1)
         return s
 
-    def get_training_data(self, full_data, static_data, window:int = 12, slice_id=None):
+    def get_training_data(
+        self, full_data, static_data, window: int = 12, slice_id=None
+    ):
         slice_window = full_data
         no_timesteps = slice_window.shape[0]
         assert (

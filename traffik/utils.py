@@ -93,7 +93,11 @@ def splice_test_tensor(input_file, channel, output_file):
     help="usage: tc2i.py -i <input file with h5 array> -c <channel(s)> -s <output file name stub> "
 )
 @click.option("--input_file", "-i")
-@click.option("--channel", "-c", multiple=True, )
+@click.option(
+    "--channel",
+    "-c",
+    multiple=True,
+)
 @click.option("--output_dir", "-s")
 @click.option("--factor", "-f", default=1)
 def tc2i(input_file, channel, output_dir, factor):
