@@ -117,7 +117,9 @@ def process_grid(
     return grid
 
 
-def combine_grids(city, train_grid, validation_grid, test_grid, data_type, save=True) -> np.array:
+def combine_grids(
+    city, train_grid, validation_grid, test_grid, data_type, save=True
+) -> np.array:
     """
     Combines the training, validation and test grids into one grid.
     :return:
