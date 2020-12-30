@@ -53,6 +53,13 @@ def get_road_network(source_dir: str, image_size: List, testing: bool, data_type
     files = os.listdir(source_dir)
     total_files = len(files)
 
+    logger.info(
+        "Start processing road network for ",
+        source_dir=source_dir,
+        testing=testing,
+        data_type=data_type,
+    )
+
     for f in tqdm(files):
         reader = h5py.File(os.path.join(source_dir, f), "r")
         data = reader[list(reader.keys())[0]]
@@ -93,7 +100,12 @@ def process_grid(
         logger.info("Reading existing grid file:", file=grid_handle)
         grid = np.load(grid_handle)
     else:
-        logger.info("Creating new road network grid file for", city=city, mode=mode, data_type=data_type)
+        logger.info(
+            "Creating new road network grid file for",
+            city=city,
+            mode=mode,
+            data_type=data_type,
+        )
         grid = get_road_network(source_dir, image_size, mode == "testing", data_type)
         if save:
             logger.info(

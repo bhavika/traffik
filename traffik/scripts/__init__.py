@@ -35,7 +35,12 @@ def process(city):
 @click.option(
     "--city", callback=validate_cityname, help="The city dataset to be processed."
 )
-@click.option('--data-type', type=click.Choice([config.MAX_VOLUME, config.AVG_TOTAL_VOLUME], case_sensitive=False))
+@click.option(
+    "--data-type",
+    type=click.Choice(
+        [config.MAX_VOLUME, config.AVG_TOTAL_VOLUME], case_sensitive=False
+    ),
+)
 def make_static_grid(city, data_type):
     image_size = [495, 436]
     build_static_grid(city, image_size, data_type)
