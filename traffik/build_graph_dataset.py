@@ -53,7 +53,7 @@ def get_road_network(source_dir: str, image_size: List, testing: bool, data_type
     files = os.listdir(source_dir)
     total_files = len(files)
 
-    logger.info(
+    logger.debug(
         "Start processing road network for ",
         source_dir=source_dir,
         testing=testing,
@@ -91,17 +91,17 @@ def process_grid(
     city: str, image_size: List, mode: str, data_type: str, save: bool = True
 ):
     grid_handle = os.path.join(
-        config.INTERMEDIATE_DIR, f"{city}_{mode}_roads_{data_type}.npy"
+        os.getenv('DATA_DIR'), config.INTERMEDIATE_DIR, f"{city}_{mode}_roads_{data_type}.npy"
     )
 
     source_dir = os.path.join(os.getenv("DATA_DIR"), city, mode)
 
     if os.path.isfile(grid_handle):
-        logger.info("Reading existing grid file:", file=grid_handle)
+        logger.info("[process_grid] Reading existing grid file:", file=grid_handle)
         grid = np.load(grid_handle)
     else:
         logger.info(
-            "Creating new road network grid file for",
+            "[process_grid] Creating new road network grid file for",
             city=city,
             mode=mode,
             data_type=data_type,
@@ -109,7 +109,7 @@ def process_grid(
         grid = get_road_network(source_dir, image_size, mode == "testing", data_type)
         if save:
             logger.info(
-                "Saving processed grid for",
+                "[process_grid] Saving processed grid for",
                 city=city,
                 data_type=data_type,
                 destination=grid_handle,
@@ -125,7 +125,7 @@ def combine_grids(city, train_grid, validation_grid, test_grid, data_type, save=
     if save:
         fname = f"{city}_roads_{data_type}.npy"
         logger.info(
-            "Saving combined grid for ",
+            "[combine_grids] Saving combined grid for ",
             city=city,
             data_type=data_type,
             destination=fname,
@@ -139,14 +139,18 @@ def build_static_grid(city: str, image_size: List, data_type: str):
     Calculates overall max volume for each pixel across all channels.
     :return:
     """
-    logger.info("Calculating and saving the road network for training data.")
+
+    if not os.path.exists(os.path.join(os.getenv('DATA_DIR'), config.INTERMEDIATE_DIR)):
+        os.makedirs(os.path.join(os.getenv('DATA_DIR'), config.INTERMEDIATE_DIR))
+
+    logger.info("[build_static_grid] Calculating and saving the road network for training data.")
 
     train_grid = process_grid(
         city, image_size, config.TRAINING_DIR, data_type, save=True
     )
     road_percentage = (train_grid != 0).sum() / (image_size[0] * image_size[1])
     logger.info(
-        "Training images show the road network covers percentage of image",
+        "[build_static_grid] Training images show the road network covers percentage of image",
         cover=road_percentage,
     )
 
@@ -155,24 +159,24 @@ def build_static_grid(city: str, image_size: List, data_type: str):
     )
     road_percentage = (validation_grid != 0).sum() / (image_size[0] * image_size[1])
     logger.info(
-        "Validation images show the road network covers percentage of image",
+        "[build_static_grid] Validation images show the road network covers percentage of image",
         cover=road_percentage,
     )
 
     test_grid = process_grid(city, image_size, config.TESTING_DIR, data_type, save=True)
     road_percentage = (test_grid != 0).sum() / (image_size[0] * image_size[1])
     logger.info(
-        "Test images show the road network covers percentage of image",
+        "[build_static_grid] Test images show the road network covers percentage of image",
         cover=road_percentage,
     )
 
-    logger.info("Combining train, validation and test grids into one.")
+    logger.info("[build_static_grid] Combining train, validation and test grids into one.")
     combined_grid = combine_grids(
         city, train_grid, validation_grid, test_grid, data_type
     )
     road_percentage = (combined_grid != 0).sum() / (image_size[0] * image_size[1])
     logger.info(
-        "Combined images show a road network covers percentage of image",
+        "[build_static_grid] Combined images show a road network covers percentage of image",
         cover=road_percentage,
     )
 
