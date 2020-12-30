@@ -130,7 +130,7 @@ def combine_grids(city, train_grid, validation_grid, test_grid, data_type, save=
             data_type=data_type,
             destination=fname,
         )
-        np.save(os.path.join(config.INTERMEDIATE_DIR, fname), grid)
+        np.save(os.path.join(os.getenv('DATA_DIR'), config.INTERMEDIATE_DIR, fname), grid)
     return grid
 
 
