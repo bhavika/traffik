@@ -4,7 +4,7 @@ import h5py
 from tqdm import tqdm
 import traffik.config as config
 from traffik.logger import logger
-from typing import List
+from typing import List, Tuple
 import torch
 
 
@@ -88,6 +88,11 @@ def get_road_network(source_dir: str, image_size: List, testing: bool, data_type
 def process_grid(
     city: str, image_size: List, mode: str, data_type: str, save: bool = True
 ) -> np.array:
+    """
+    Builds the road network for a city & data_type (max_volume, avg_total_volume).
+    :return: numpy array
+    """
+
     grid_handle = os.path.join(
         os.getenv("DATA_DIR"),
         config.INTERMEDIATE_DIR,
@@ -196,7 +201,10 @@ def build_static_grid(city: str, image_size: List, data_type: str):
     ).sum() == 0, "Seems like there is activity in image areas in the test set that isn't in the train set."
 
 
-def get_edges_and_unconnected_nodes(node_coordinates):
+def get_edges_and_unconnected_nodes(node_coordinates: np.array) -> Tuple[List, List]:
+    """
+    Creates edges and finds unconnected nodes in a set of node coordinates.
+    """
     edge_start = []
     edge_to = []
     unconnected_nodes = []
@@ -208,15 +216,17 @@ def get_edges_and_unconnected_nodes(node_coordinates):
             & (node_coordinates[:, 0] <= (i + 1))
             & (node_coordinates[:, 1] >= (j - 1))
             & (node_coordinates[:, 1] <= (j + 1))
-        )
-        adj_nodes = all_nodes[0][all_nodes[0] != idx]
+        )  # get all nodes adjacent to the current node
+        adj_nodes = all_nodes[0][
+            all_nodes[0] != idx
+        ]  # from all the adjacent nodes filter out the original "self" or "start"
         if len(adj_nodes) > 0:
-            start_adj = np.ones(len(adj_nodes)) * idx
-            end_adj = adj_nodes
+            start_adj = np.ones(len(adj_nodes)) * idx # create an array of the form [idx, idx,...] for as many adj_nodes
+            end_adj = adj_nodes # end nodes
             edge_start = np.append(edge_start, start_adj)
             edge_to = np.append(edge_to, end_adj)
         else:
-            unconnected_nodes = np.append(unconnected_nodes, idx)
+            unconnected_nodes = np.append(unconnected_nodes, idx) # if a node idx has no adj_nodes, it's unconnected
     edge_start = edge_start.astype(int)
     edge_to = edge_to.astype(int)
     if len(unconnected_nodes) > 0:
@@ -225,8 +235,14 @@ def get_edges_and_unconnected_nodes(node_coordinates):
     return edge_idx, unconnected_nodes
 
 
-def build_nodes_edges(city, source_dir, mode, data_type, testval, volume_filter):
-    fname = os.path.join(source_dir, f"{city}_{mode}_roads_{data_type}.npy")
+def build_nodes_edges(
+    city: str, mode: str, data_type: str, testval, volume_filter: int
+):
+    fname = os.path.join(
+        os.getenv("DATA_DIR"),
+        config.INTERMEDIATE_DIR,
+        f"{city}_{mode}_roads_{data_type}.npy",
+    )
     logger.info("Loading file", file=fname)
     max_volume = np.load(fname)
 

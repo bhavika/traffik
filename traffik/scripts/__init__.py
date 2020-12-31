@@ -1,7 +1,11 @@
 import click
 import traffik
 import traffik.config as config
-from traffik.build_graph_dataset import build_graph, build_static_grid
+from traffik.build_graph_dataset import (
+    build_graph,
+    build_static_grid,
+    build_nodes_edges,
+)
 from dotenv import load_dotenv
 
 
@@ -27,28 +31,23 @@ def cli(ctx):
 @click.option(
     "--city", callback=validate_cityname, help="The city dataset to be processed."
 )
-def process(city):
-    build_graph(city)
-
-
-@cli.command("static-grid")
-@click.option(
-    "--city", callback=validate_cityname, help="The city dataset to be processed."
-)
 @click.option(
     "--data-type",
     type=click.Choice(
         [config.MAX_VOLUME, config.AVG_TOTAL_VOLUME], case_sensitive=False
     ),
 )
-def make_static_grid(city, data_type):
+@click.option(
+    "--mode",
+    type=click.Choice(
+        [config.TRAINING_DIR, config.VALIDATION_DIR, config.TESTING_DIR],
+        case_sensitive=False,
+    ),
+    help="One of training, validation or testing"
+)
+@click.option("--volume-filter", type=int)
+def process(city, data_type, mode, volume_filter):
     image_size = [495, 436]
     build_static_grid(city, image_size, data_type)
-
-
-@cli.command("train")
-@click.option(
-    "--city", callback=validate_cityname, help="The city dataset to be trained on."
-)
-def train(city):
-    pass
+    build_nodes_edges(city, mode, data_type, None, volume_filter)
+    build_graph(city)
