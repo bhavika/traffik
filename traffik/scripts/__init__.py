@@ -40,7 +40,7 @@ def cli(ctx):
 @click.option(
     "--mode",
     type=click.Choice(
-        [config.TRAINING_DIR, config.VALIDATION_DIR, config.TESTING_DIR],
+        [config.TRAINING_DIR, config.VALIDATION_DIR, config.TESTING_DIR, "all"],
         case_sensitive=False,
     ),
     help="One of training, validation or testing"
@@ -49,5 +49,9 @@ def cli(ctx):
 def process(city, data_type, mode, volume_filter):
     image_size = [495, 436]
     build_static_grid(city, image_size, data_type)
-    build_nodes_edges(city, mode, data_type, None, volume_filter)
+    if mode == "all":
+        for m in [config.TRAINING_DIR, config.VALIDATION_DIR, config.TESTING_DIR]:
+            build_nodes_edges(city, m, data_type, None, volume_filter)
+    else:
+        build_nodes_edges(city, mode, data_type, None, volume_filter)
     build_graph(city)
