@@ -5,6 +5,7 @@ from tqdm import tqdm
 import traffik.config as config
 from traffik.logger import logger
 from typing import List
+import torch
 
 
 def setup(city: str):
@@ -193,3 +194,112 @@ def build_static_grid(city: str, image_size: List, data_type: str):
     assert (
         np.subtract((test_grid != 0) * 1, (combined_grid != 0) * 1) == 1
     ).sum() == 0, "Seems like there is activity in image areas in the test set that isn't in the train set."
+
+
+def get_edges_and_unconnected_nodes(node_coordinates):
+    edge_start = []
+    edge_to = []
+    unconnected_nodes = []
+
+    for idx in range(len(node_coordinates)):
+        i, j = node_coordinates[idx]
+        all_nodes = np.where(
+            (node_coordinates[:, 0] >= (i - 1))
+            & (node_coordinates[:, 0] <= (i + 1))
+            & (node_coordinates[:, 1] >= (j - 1))
+            & (node_coordinates[:, 1] <= (j + 1))
+        )
+        adj_nodes = all_nodes[0][all_nodes[0] != idx]
+        if len(adj_nodes) > 0:
+            start_adj = np.ones(len(adj_nodes)) * idx
+            end_adj = adj_nodes
+            edge_start = np.append(edge_start, start_adj)
+            edge_to = np.append(edge_to, end_adj)
+        else:
+            unconnected_nodes = np.append(unconnected_nodes, idx)
+    edge_start = edge_start.astype(int)
+    edge_to = edge_to.astype(int)
+    if len(unconnected_nodes) > 0:
+        unconnected_nodes = unconnected_nodes.astype(int)
+    edge_idx = [edge_start, edge_to]
+    return edge_idx, unconnected_nodes
+
+
+def build_nodes_edges(city, source_dir, mode, data_type, testval, volume_filter):
+    fname = os.path.join(source_dir, f"{city}_{mode}_roads_{data_type}.npy")
+    logger.info("Loading file", file=fname)
+    max_volume = np.load(fname)
+
+    filtered_grid = max_volume > volume_filter
+    graph_coverage = filtered_grid.sum() / (495 * 436)
+    logger.info("Ratio of image covered by road network", ratio=graph_coverage)
+
+    all_node_coordinates = np.array(np.where(filtered_grid)).transpose()
+    edge_idx, uncon_nodes = get_edges_and_unconnected_nodes(all_node_coordinates)
+
+    logger.info("Number of nodes", nodes=len(all_node_coordinates))
+    logger.info("Number of edges", edges=len(edge_idx[0]))
+    logger.info("Number of unconnected nodes", unconnected_nodes=len(uncon_nodes))
+
+    logger.info(f"Rerunning with only connected nodes")
+    logger.info(f"Must be faster ways of doing this.....")
+    connected_nodes = all_node_coordinates[np.unique(edge_idx[0])]
+    edge_idx, uncon_nodes = get_edges_and_unconnected_nodes(connected_nodes)
+    logger.info("Number of nodes", nodes=len(all_node_coordinates))
+    logger.info("Number of edges", edges=len(edge_idx[0]))
+    logger.info("Number of unconnected nodes", unconnected_nodes=len(uncon_nodes))
+
+    logger.info(f"Saving...")
+    if testval is None:
+        node_file = os.path.join(
+            os.getenv("DATA_DIR"),
+            config.INTERMEDIATE_DIR,
+            f"{city}_nodes_{volume_filter}.npy",
+        )
+        edge_file = os.path.join(
+            os.getenv("DATA_DIR"),
+            config.INTERMEDIATE_DIR,
+            f"{city}_edges_{volume_filter}.npy",
+        )
+        unc_node_file = os.path.join(
+            os.getenv("DATA_DIR"),
+            config.INTERMEDIATE_DIR,
+            f"{city}_unc_nodes_{volume_filter}.npy",
+        )
+        mask_file = os.path.join(
+            os.getenv("DATA_DIR"),
+            config.INTERMEDIATE_DIR,
+            f"{city}_Mask_{volume_filter}.pt",
+        )
+    else:
+        node_file = os.path.join(
+            os.getenv("DATA_DIR"),
+            config.INTERMEDIATE_DIR,
+            f"{city}_nodes_{volume_filter}_{testval}.npy",
+        )
+        edge_file = os.path.join(
+            os.getenv("DATA_DIR"),
+            config.INTERMEDIATE_DIR,
+            f"{city}_edges_{volume_filter}_{testval}.npy",
+        )
+        unc_node_file = os.path.join(
+            os.getenv("DATA_DIR"),
+            config.INTERMEDIATE_DIR,
+            f"{city}_unc_nodes_{volume_filter}_{testval}.npy",
+        )
+        mask_file = os.path.join(
+            os.getenv("DATA_DIR"),
+            config.INTERMEDIATE_DIR,
+            f"{city}_Mask_{volume_filter}.pt",
+        )
+
+    logger.info("Saving nodes to file", file=node_file)
+    np.save(node_file, connected_nodes)
+    logger.info("Saving edges to file", file=edge_file)
+    np.save(edge_file, edge_idx)
+    logger.info("Saving unconnected nodes to file", file=unc_node_file)
+    np.save(unc_node_file, uncon_nodes)
+    mask = torch.zeros([495, 436]).byte()
+    mask[connected_nodes[:, 0], connected_nodes[:, 1]] = 1
+    logger.info("Saving mask to file", file=mask_file)
+    torch.save(mask, mask_file)
