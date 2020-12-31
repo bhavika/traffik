@@ -1,7 +1,7 @@
 import click
 import traffik
 import traffik.config as config
-from traffik.build_graph_dataset import (
+from traffik.dataset import (
     build_graph,
     build_static_grid,
     build_nodes_edges,
@@ -43,7 +43,7 @@ def cli(ctx):
         [config.TRAINING_DIR, config.VALIDATION_DIR, config.TESTING_DIR, "all"],
         case_sensitive=False,
     ),
-    help="One of training, validation or testing"
+    help="One of training, validation or testing",
 )
 @click.option("--volume-filter", type=int)
 def process(city, data_type, mode, volume_filter):

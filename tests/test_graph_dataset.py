@@ -1,4 +1,4 @@
-import traffik.build_graph_dataset as gd
+import traffik.dataset as gd
 import pytest
 import os
 import numpy as np
@@ -15,8 +15,8 @@ def test_setup_paths(mock_env_variables):
 
     assert actual == {
         "output_path": "/tmp/processed",
-        "node": "/tmp/processed/berlin/berlin_nodes_5.npy",
-        "edge": "/tmp/processed/berlin/berlin_edges_5.npy",
+        "node": "/tmp/intermediate/berlin_nodes_5.npy",
+        "edge": "/tmp/intermediate/berlin_edges_5.npy",
     }
     assert os.path.exists(actual["output_path"]) is True
 
