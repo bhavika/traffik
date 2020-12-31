@@ -263,7 +263,6 @@ def build_nodes_edges(
     logger.info("Number of unconnected nodes", unconnected_nodes=len(uncon_nodes))
 
     logger.info(f"Rerunning with only connected nodes")
-    logger.info(f"Must be faster ways of doing this.....")
     connected_nodes = all_node_coordinates[np.unique(edge_idx[0])]
     edge_idx, uncon_nodes = get_edges_and_unconnected_nodes(connected_nodes)
     logger.info("Number of nodes", nodes=len(all_node_coordinates))
