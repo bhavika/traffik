@@ -1,4 +1,4 @@
-import traffik.build_graph_dataset as gd
+import traffik.dataset as gd
 import pytest
 import os
 import numpy as np
