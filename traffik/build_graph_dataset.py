@@ -13,14 +13,15 @@ def setup(city: str):
 
     output_path = os.path.join(os.getenv("DATA_DIR"), config.PROCESSED_DIR)
 
-    if not os.path.exists(output_path):
-        os.makedirs(output_path)
-
     if not os.path.exists(os.path.join(output_path, city)):
         os.makedirs(os.path.join(output_path, city))
 
-    node_handle = os.path.join(output_path, city, f"{city}_nodes_5.npy")
-    edge_handle = os.path.join(output_path, city, f"{city}_edges_5.npy")
+    node_handle = os.path.join(
+        os.getenv("DATA_DIR"), config.INTERMEDIATE_DIR, f"{city}_nodes_5.npy"
+    )
+    edge_handle = os.path.join(
+        os.getenv("DATA_DIR"), config.INTERMEDIATE_DIR, f"{city}_edges_5.npy"
+    )
 
     return {"output_path": output_path, "node": node_handle, "edge": edge_handle}
 
@@ -221,14 +222,18 @@ def get_edges_and_unconnected_nodes(node_coordinates: np.array) -> Tuple[List, L
             all_nodes[0] != idx
         ]  # from all the adjacent nodes filter out the original "self" or "start"
         if len(adj_nodes) > 0:
-            start_adj = np.ones(len(adj_nodes)) * idx # create an array of the form [idx, idx,...] for as many adj_nodes
-            end_adj = adj_nodes # end nodes
+            start_adj = (
+                np.ones(len(adj_nodes)) * idx
+            )  # create an array of the form [idx, idx,...] for as many adj_nodes
+            end_adj = adj_nodes  # end nodes
             edge_start = np.append(edge_start, start_adj)
             edge_to = np.append(edge_to, end_adj)
         else:
-            unconnected_nodes = np.append(unconnected_nodes, idx) # if a node idx has no adj_nodes, it's unconnected
-    edge_start = edge_start.astype(int)
-    edge_to = edge_to.astype(int)
+            unconnected_nodes = np.append(
+                unconnected_nodes, idx
+            )  # if a node idx has no adj_nodes, it's unconnected
+    edge_start = np.asarray(edge_start).astype(int)
+    edge_to = np.asarray(edge_to).astype(int)
     if len(unconnected_nodes) > 0:
         unconnected_nodes = unconnected_nodes.astype(int)
     edge_idx = [edge_start, edge_to]

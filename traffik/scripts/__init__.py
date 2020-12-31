@@ -43,7 +43,7 @@ def cli(ctx):
         [config.TRAINING_DIR, config.VALIDATION_DIR, config.TESTING_DIR, "all"],
         case_sensitive=False,
     ),
-    help="One of training, validation or testing"
+    help="One of training, validation or testing",
 )
 @click.option("--volume-filter", type=int)
 def process(city, data_type, mode, volume_filter):
