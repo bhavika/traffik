@@ -1,7 +1,7 @@
 import click
 import traffik
 import traffik.config as config
-from traffik.build_graph_dataset import (
+from traffik.dataset import (
     build_graph,
     build_static_grid,
     build_nodes_edges,
