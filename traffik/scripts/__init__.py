@@ -73,12 +73,12 @@ def process(city, data_type, mode, volume_filter):
 
     if mode == "all":
         if os.path.exists(city_road_network):
-            build_nodes_edges(city, data_type, None, volume_filter)
+            build_nodes_edges(city, data_type, volume_filter)
             [build_graph(city, m) for m in config.modes]
         else:
             raise Exception(
                 f"The {city_road_network} file has not been created yet. Run `traffik prep` first."
             )
     else:
-        build_nodes_edges(city, data_type, None, volume_filter)
+        build_nodes_edges(city, data_type, volume_filter)
         build_graph(city, mode)

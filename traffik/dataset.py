@@ -37,7 +37,7 @@ def build_graph(city: str, mode: str):
         os.path.join(locations["output_path"], city, f"{city}_{mode}_5.h5"), "w"
     )
 
-    for f in os.listdir(raw_data):
+    for f in tqdm(os.listdir(raw_data)):
         reader = h5py.File(os.path.join(raw_data, f), "r")
         data = reader[list(reader.keys())[0]]  # key is 'array'
         if mode == config.TESTING_DIR:
@@ -206,7 +206,7 @@ def get_edges_and_unconnected_nodes(node_coordinates: np.array) -> Tuple[List, L
     return edge_idx, unconnected_nodes
 
 
-def build_nodes_edges(city: str, data_type: str, testval, volume_filter: int):
+def build_nodes_edges(city: str, data_type: str, volume_filter: int):
     fname = os.path.join(
         os.getenv("DATA_DIR"),
         config.INTERMEDIATE_DIR,
@@ -234,48 +234,27 @@ def build_nodes_edges(city: str, data_type: str, testval, volume_filter: int):
     logger.info("Number of unconnected nodes", unconnected_nodes=len(uncon_nodes))
 
     logger.info(f"Saving...")
-    if testval is None:
-        node_file = os.path.join(
-            os.getenv("DATA_DIR"),
-            config.INTERMEDIATE_DIR,
-            f"{city}_nodes_{volume_filter}.npy",
-        )
-        edge_file = os.path.join(
-            os.getenv("DATA_DIR"),
-            config.INTERMEDIATE_DIR,
-            f"{city}_edges_{volume_filter}.npy",
-        )
-        unc_node_file = os.path.join(
-            os.getenv("DATA_DIR"),
-            config.INTERMEDIATE_DIR,
-            f"{city}_unc_nodes_{volume_filter}.npy",
-        )
-        mask_file = os.path.join(
-            os.getenv("DATA_DIR"),
-            config.INTERMEDIATE_DIR,
-            f"{city}_mask_{volume_filter}.pt",
-        )
-    else:
-        node_file = os.path.join(
-            os.getenv("DATA_DIR"),
-            config.INTERMEDIATE_DIR,
-            f"{city}_nodes_{volume_filter}_{testval}.npy",
-        )
-        edge_file = os.path.join(
-            os.getenv("DATA_DIR"),
-            config.INTERMEDIATE_DIR,
-            f"{city}_edges_{volume_filter}_{testval}.npy",
-        )
-        unc_node_file = os.path.join(
-            os.getenv("DATA_DIR"),
-            config.INTERMEDIATE_DIR,
-            f"{city}_unc_nodes_{volume_filter}_{testval}.npy",
-        )
-        mask_file = os.path.join(
-            os.getenv("DATA_DIR"),
-            config.INTERMEDIATE_DIR,
-            f"{city}_mask_{volume_filter}.pt",
-        )
+
+    node_file = os.path.join(
+        os.getenv("DATA_DIR"),
+        config.INTERMEDIATE_DIR,
+        f"{city}_nodes_{volume_filter}.npy",
+    )
+    edge_file = os.path.join(
+        os.getenv("DATA_DIR"),
+        config.INTERMEDIATE_DIR,
+        f"{city}_edges_{volume_filter}.npy",
+    )
+    unc_node_file = os.path.join(
+        os.getenv("DATA_DIR"),
+        config.INTERMEDIATE_DIR,
+        f"{city}_unc_nodes_{volume_filter}.npy",
+    )
+    mask_file = os.path.join(
+        os.getenv("DATA_DIR"),
+        config.INTERMEDIATE_DIR,
+        f"{city}_mask_{volume_filter}.pt",
+    )
 
     logger.info("Saving nodes to file", file=node_file)
     np.save(node_file, connected_nodes)
