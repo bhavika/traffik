@@ -3,6 +3,7 @@ import pytest
 import os
 import numpy as np
 import numpy.testing
+import torch
 
 
 @pytest.fixture
@@ -51,3 +52,36 @@ def test_combine_grids_different_shapes():
         save=False,
     )
     numpy.testing.assert_equal(grid, [1, 1, 1])
+
+
+def test_mask():
+    left = "/home/bhavika/Desktop/Projects/traffic/traffic4cast_graph/data/processed/Berlin/Berlin_Mask_5.pt"
+    right = "/home/bhavika/Desktop/Projects/traffic/traffic4cast2020/intermediate/berlin_mask_5.pt"
+
+    l = torch.load(left)
+    r = torch.load(right)
+
+    diff = torch.nonzero(l - r)
+
+    print(diff)
+    print(diff.shape)
+
+
+def test_edges():
+    left = "/home/bhavika/Desktop/Projects/traffic/traffic4cast_graph/data/processed/Berlin/Berlin_edges_5.npy"
+    right = "/home/bhavika/Desktop/Projects/traffic/traffic4cast2020/intermediate/berlin_edges_5.npy"
+
+    l = np.load(left)
+    r = np.load(right)
+
+    np.testing.assert_equal(l, r)
+
+
+def test_nodes():
+    left = "/home/bhavika/Desktop/Projects/traffic/traffic4cast_graph/data/processed/Berlin/Berlin_nodes_5.npy"
+    right = "/home/bhavika/Desktop/Projects/traffic/traffic4cast2020/intermediate/berlin_nodes_5.npy"
+
+    l = np.load(left)
+    r = np.load(right)
+
+    np.testing.assert_equal(l, r)

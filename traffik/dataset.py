@@ -26,28 +26,27 @@ def setup(city: str):
     return {"output_path": output_path, "node": node_handle, "edge": edge_handle}
 
 
-def build_graph(city: str):
+def build_graph(city: str, mode: str):
     locations = setup(city)
     nodes = np.load(locations["node"])
 
-    for mode in [config.TRAINING_DIR, config.VALIDATION_DIR, config.TESTING_DIR]:
-        logger.debug("Start building graph dataset for", city=city, mode=mode)
-        raw_data = os.path.join(os.getenv("DATA_DIR"), city, mode)
+    logger.debug("Start building graph dataset for", city=city, mode=mode)
+    raw_data = os.path.join(os.getenv("DATA_DIR"), city, mode)
 
-        hf_handle = h5py.File(
-            os.path.join(locations["output_path"], city, f"{city}_{mode}_5.h5"), "w"
-        )
+    hf_handle = h5py.File(
+        os.path.join(locations["output_path"], city, f"{city}_{mode}_5.h5"), "w"
+    )
 
-        for f in os.listdir(raw_data):
-            reader = h5py.File(os.path.join(raw_data, f), "r")
-            data = reader[list(reader.keys())[0]]  # key is 'array'
-            if mode == config.TESTING_DIR:
-                graph_data = np.array(data)[:, :, nodes[:, 0], nodes[:, 1], :]
-            else:
-                graph_data = np.array(data)[:, nodes[:, 0], nodes[:, 1], :]
-            reader.close()
-            hf_handle.create_dataset(f, data=graph_data, compression="lzf")
-        hf_handle.close()
+    for f in os.listdir(raw_data):
+        reader = h5py.File(os.path.join(raw_data, f), "r")
+        data = reader[list(reader.keys())[0]]  # key is 'array'
+        if mode == config.TESTING_DIR:
+            graph_data = np.array(data)[:, :, nodes[:, 0], nodes[:, 1], :]
+        else:
+            graph_data = np.array(data)[:, nodes[:, 0], nodes[:, 1], :]
+        reader.close()
+        hf_handle.create_dataset(f, data=graph_data, compression="lzf")
+    hf_handle.close()
 
 
 def get_road_network(source_dir: str, image_size: List, testing: bool, data_type: str):
@@ -148,7 +147,7 @@ def combine_grids(
     return grid
 
 
-def build_static_grid(city: str, image_size: List, data_type: str):
+def build_static_grid(city: str, image_size: List, mode: str, data_type: str):
     """
     Calculates overall max volume for each pixel across all channels.
     """
@@ -160,46 +159,13 @@ def build_static_grid(city: str, image_size: List, data_type: str):
         "[build_static_grid] Calculating and saving the road network for training data."
     )
 
-    train_grid = process_grid(
-        city, image_size, config.TRAINING_DIR, data_type, save=True
-    )
-    road_percentage = (train_grid != 0).sum() / (image_size[0] * image_size[1])
+    grid = process_grid(city, image_size, mode, data_type, save=True)
+    road_percentage = (grid != 0).sum() / (image_size[0] * image_size[1])
     logger.info(
-        "[build_static_grid] Training images show the road network covers percentage of image",
+        f"[build_static_grid] {mode} images show the road network covers percentage of image",
         cover=road_percentage,
     )
-
-    validation_grid = process_grid(
-        city, image_size, config.VALIDATION_DIR, data_type, save=True
-    )
-    road_percentage = (validation_grid != 0).sum() / (image_size[0] * image_size[1])
-    logger.info(
-        "[build_static_grid] Validation images show the road network covers percentage of image",
-        cover=road_percentage,
-    )
-
-    test_grid = process_grid(city, image_size, config.TESTING_DIR, data_type, save=True)
-    road_percentage = (test_grid != 0).sum() / (image_size[0] * image_size[1])
-    logger.info(
-        "[build_static_grid] Test images show the road network covers percentage of image",
-        cover=road_percentage,
-    )
-
-    logger.info(
-        "[build_static_grid] Combining train, validation and test grids into one."
-    )
-    combined_grid = combine_grids(
-        city, train_grid, validation_grid, test_grid, data_type
-    )
-    road_percentage = (combined_grid != 0).sum() / (image_size[0] * image_size[1])
-    logger.info(
-        "[build_static_grid] Combined images show a road network covers percentage of image",
-        cover=road_percentage,
-    )
-
-    assert (
-        np.subtract((test_grid != 0) * 1, (combined_grid != 0) * 1) == 1
-    ).sum() == 0, "Seems like there is activity in image areas in the test set that isn't in the train set."
+    return grid
 
 
 def get_edges_and_unconnected_nodes(node_coordinates: np.array) -> Tuple[List, List]:
@@ -240,13 +206,11 @@ def get_edges_and_unconnected_nodes(node_coordinates: np.array) -> Tuple[List, L
     return edge_idx, unconnected_nodes
 
 
-def build_nodes_edges(
-    city: str, mode: str, data_type: str, testval, volume_filter: int
-):
+def build_nodes_edges(city: str, data_type: str, testval, volume_filter: int):
     fname = os.path.join(
         os.getenv("DATA_DIR"),
         config.INTERMEDIATE_DIR,
-        f"{city}_{mode}_roads_{data_type}.npy",
+        f"{city}_roads_{data_type}.npy",
     )
     logger.info("Loading file", file=fname)
     max_volume = np.load(fname)
@@ -289,7 +253,7 @@ def build_nodes_edges(
         mask_file = os.path.join(
             os.getenv("DATA_DIR"),
             config.INTERMEDIATE_DIR,
-            f"{city}_Mask_{volume_filter}.pt",
+            f"{city}_mask_{volume_filter}.pt",
         )
     else:
         node_file = os.path.join(
@@ -310,7 +274,7 @@ def build_nodes_edges(
         mask_file = os.path.join(
             os.getenv("DATA_DIR"),
             config.INTERMEDIATE_DIR,
-            f"{city}_Mask_{volume_filter}.pt",
+            f"{city}_mask_{volume_filter}.pt",
         )
 
     logger.info("Saving nodes to file", file=node_file)
