@@ -1,10 +1,12 @@
 import click
+import os
 import traffik
 import traffik.config as config
 from traffik.dataset import (
     build_graph,
     build_static_grid,
     build_nodes_edges,
+    combine_grids,
 )
 from dotenv import load_dotenv
 
@@ -27,6 +29,24 @@ def cli(ctx):
     ctx.obj = {}
 
 
+@cli.command("prep")
+@click.option(
+    "--city", callback=validate_cityname, help="The city dataset to be processed."
+)
+@click.option(
+    "--data-type",
+    type=click.Choice(
+        [config.MAX_VOLUME, config.AVG_TOTAL_VOLUME], case_sensitive=False
+    ),
+)
+def prep(city, data_type):
+    grids = []
+    image_size = [495, 436]
+    for m in config.modes:
+        grids.append(build_static_grid(city, image_size, m, data_type))
+    combine_grids(city, grids[0], grids[1], grids[2], data_type, save=True)
+
+
 @cli.command("process")
 @click.option(
     "--city", callback=validate_cityname, help="The city dataset to be processed."
@@ -47,11 +67,18 @@ def cli(ctx):
 )
 @click.option("--volume-filter", type=int)
 def process(city, data_type, mode, volume_filter):
-    image_size = [495, 436]
-    build_static_grid(city, image_size, data_type)
+    city_road_network = os.path.join(
+        os.getenv("DATA_DIR"), config.INTERMEDIATE_DIR, f"{city}_roads_{data_type}.npy"
+    )
+
     if mode == "all":
-        for m in [config.TRAINING_DIR, config.VALIDATION_DIR, config.TESTING_DIR]:
-            build_nodes_edges(city, m, data_type, None, volume_filter)
+        if os.path.exists(city_road_network):
+            build_nodes_edges(city, data_type, volume_filter)
+            [build_graph(city, m) for m in config.modes]
+        else:
+            raise Exception(
+                f"The {city_road_network} file has not been created yet. Run `traffik prep` first."
+            )
     else:
-        build_nodes_edges(city, mode, data_type, None, volume_filter)
-    build_graph(city)
+        build_nodes_edges(city, data_type, volume_filter)
+        build_graph(city, mode)

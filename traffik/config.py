@@ -7,3 +7,4 @@ TESTING_DIR = "testing"
 INTERMEDIATE_DIR = "intermediate"
 MAX_VOLUME = "max_volume"
 AVG_TOTAL_VOLUME = "avg_total_volume"
+modes = [TRAINING_DIR, VALIDATION_DIR, TESTING_DIR]

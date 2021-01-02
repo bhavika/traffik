@@ -3,6 +3,7 @@ import pytest
 import os
 import numpy as np
 import numpy.testing
+import torch
 
 
 @pytest.fixture
