@@ -1,6 +1,7 @@
 import click
 import os
 import traffik
+from traffik.helpers import reproducibility
 import traffik.config as config
 from traffik.dataset import (
     build_graph,
@@ -12,6 +13,7 @@ from dotenv import load_dotenv
 import wandb
 
 wandb.init(project=os.getenv("WANDB_PROJECT"))
+reproducibility()
 
 
 def validate_cityname(
