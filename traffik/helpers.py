@@ -1,9 +1,9 @@
 import wandb
 import numpy as np
 import os
-from config import INTERMEDIATE_DIR
+from traffik.config import INTERMEDIATE_DIR
 from typing import Union
-from logger import logger
+from traffik.logger import logger
 
 
 def data_logger(data_obj: Union[str, np.ndarray], description: str = "train"):
