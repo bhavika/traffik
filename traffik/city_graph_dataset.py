@@ -15,7 +15,7 @@ class CityGraphDataset(Dataset):
         raw_dir: str,
         base_dir: str,
         city: str,
-        forward_mins: np.array,
+        forward_mins: np.ndarray,
         window: int = 12,
         mode: str = "training",
         overlap: bool = True,

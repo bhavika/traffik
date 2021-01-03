@@ -77,14 +77,14 @@ def process(city, data_type, mode, volume_filter):
         os.getenv("DATA_DIR"), config.INTERMEDIATE_DIR, f"{city}_roads_{data_type}.npy"
     )
 
-    if mode == "all":
-        if os.path.exists(city_road_network):
-            build_nodes_edges(city, data_type, volume_filter)
-            [build_graph(city, m) for m in config.modes]
-        else:
-            raise Exception(
-                f"The {city_road_network} file has not been created yet. Run `traffik prep` first."
-            )
-    else:
+    if os.path.exists(city_road_network):
         build_nodes_edges(city, data_type, volume_filter)
+    else:
+        raise Exception(
+            f"The {city_road_network} file has not been created yet. Run `traffik prep` first."
+        )
+
+    if mode == "all":
+        [build_graph(city, m) for m in config.modes]
+    else:
         build_graph(city, mode)
