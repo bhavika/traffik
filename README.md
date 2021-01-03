@@ -2,4 +2,4 @@
 
 ![Travis](https://travis-ci.com/bhavika/traffik.svg?branch=master)
 
-![traffik](https://media.giphy.com/media/7uu3K66gb5pPW/giphy.gif)
+![traffik](https://media.giphy.com/media/JOjumF8rHUHINyKObk/giphy.gif)
