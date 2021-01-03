@@ -15,9 +15,8 @@ jobs:
             secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
             account_id: ${{ secrets.AWS_ACCOUNT_ID }}
             repo: traffik
+            dockerfile: Dockerfile.gpu
             create_repo: true
             region: us-east-1
             tags: latest,${{ github.sha }}
-            extra_build_args: --build-arg WANDB_API_KEY=$WANDB_API_KEY \
-              --build-arg WANDB_PROJECT=$WANDB_PROJECT \
-              --build-arg WANDB_USERNAME=$WANDB_USERNAME
+            extra_build_args: --build-arg WANDB_API_KEY=$WANDB_API_KEY --build-arg WANDB_PROJECT=$WANDB_PROJECT --build-arg WANDB_USERNAME=$WANDB_USERNAME
