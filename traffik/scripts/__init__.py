@@ -47,12 +47,30 @@ def cli(ctx):
 def prep(city, data_type):
     grids = []
     image_size = [495, 436]
+
+    run = wandb.init(job_type="prep")
+
+    artifact = wandb.Artifact(
+        "gnn-dataset",
+        type="dataset",
+        description="Data from the prep stage",
+        metadata={
+            "solution": "traffic4cast2020-place4",
+            "dataset": "road network grid",
+        },
+    )
     wandb.config.image_size = image_size
     wandb.config.city = city
     wandb.config.data_type = data_type
+
     for m in config.modes:
-        grids.append(build_static_grid(city, image_size, m, data_type))
-    combine_grids(city, grids[0], grids[1], grids[2], data_type, save=True)
+        grids.append(
+            build_static_grid(city, image_size, m, data_type, artifact=artifact)
+        )
+    grid = combine_grids(city, grids[0], grids[1], grids[2], data_type, save=True)
+    if isinstance(grid, str):
+        artifact.add_file(grid, name="combined-grid")
+    run.log_artifact(artifact)
 
 
 @cli.command("process")
@@ -79,8 +97,20 @@ def process(city, data_type, mode, volume_filter):
         os.getenv("DATA_DIR"), config.INTERMEDIATE_DIR, f"{city}_roads_{data_type}.npy"
     )
 
+    run = wandb.init(job_type="process")
+
+    artifact = wandb.Artifact(
+        "graph-dataset",
+        type="dataset",
+        description="Data from the process stage",
+        metadata={
+            "solution": "traffic4cast2020-place4",
+            "dataset": "nodes, edges, mask files",
+        },
+    )
+
     if os.path.exists(city_road_network):
-        build_nodes_edges(city, data_type, volume_filter)
+        build_nodes_edges(city, data_type, volume_filter, artifact)
     else:
         raise Exception(
             f"The {city_road_network} file has not been created yet. Run `traffik prep` first."
@@ -89,4 +119,4 @@ def process(city, data_type, mode, volume_filter):
     if mode == "all":
         [build_graph(city, m) for m in config.modes]
     else:
-        build_graph(city, mode)
+        build_graph(city, mode, artifact)
