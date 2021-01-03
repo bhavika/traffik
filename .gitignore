@@ -4,3 +4,4 @@ venv/
 .git
 .pytest_cache/
 images/
+wandb/
