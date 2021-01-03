@@ -9,6 +9,9 @@ from traffik.dataset import (
     combine_grids,
 )
 from dotenv import load_dotenv
+import wandb
+
+wandb.init(project=os.getenv("WANDB_PROJECT"))
 
 
 def validate_cityname(
@@ -42,6 +45,9 @@ def cli(ctx):
 def prep(city, data_type):
     grids = []
     image_size = [495, 436]
+    wandb.config.image_size = image_size
+    wandb.config.city = city
+    wandb.config.data_type = data_type
     for m in config.modes:
         grids.append(build_static_grid(city, image_size, m, data_type))
     combine_grids(city, grids[0], grids[1], grids[2], data_type, save=True)

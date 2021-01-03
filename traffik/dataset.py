@@ -6,6 +6,7 @@ import traffik.config as config
 from traffik.logger import logger
 from typing import List, Tuple
 import torch
+import wandb
 
 
 def setup(city: str):
