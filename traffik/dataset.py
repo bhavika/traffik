@@ -47,7 +47,6 @@ def build_graph(city: str, mode: str, artifact: wandb.Artifact):
         reader.close()
         hf_handle.create_dataset(f, data=graph_data, compression="lzf")
     hf_handle.close()
-    artifact.add_file(fname, name=f"{city}_{mode}_5.h5")
 
 
 def get_road_network(source_dir: str, image_size: List, testing: bool, data_type: str):
