@@ -35,9 +35,7 @@ def build_graph(city: str, mode: str, artifact: wandb.Artifact):
     logger.debug("Start building graph dataset for", city=city, mode=mode)
     raw_data = os.path.join(os.getenv("DATA_DIR"), city, mode)
     fname = os.path.join(locations["output_path"], city, f"{city}_{mode}_5.h5")
-    hf_handle = h5py.File(
-        fname, "w"
-    )
+    hf_handle = h5py.File(fname, "w")
 
     for f in tqdm(os.listdir(raw_data)):
         reader = h5py.File(os.path.join(raw_data, f), "r")

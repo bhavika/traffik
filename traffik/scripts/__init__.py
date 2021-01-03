@@ -117,6 +117,8 @@ def process(city, data_type, mode, volume_filter):
         )
 
     if mode == "all":
-        [build_graph(city, m) for m in config.modes]
+        [build_graph(city, m, artifact=artifact) for m in config.modes]
     else:
         build_graph(city, mode, artifact)
+
+    run.log_artifact(artifact)
