@@ -14,3 +14,6 @@ jobs:
             create_repo: true
             region: us-east-1
             tags: latest,${{ github.sha }}
+            extra_build_args: --build-arg WANDB_API_KEY=${{ secrets.WANDB_API_KEY }} \
+              --build-arg WANDB_PROJECT=traffik \
+              --build-arg WANDB_USERNAME=${{ secrets.WANDB_USERNAME }} .
