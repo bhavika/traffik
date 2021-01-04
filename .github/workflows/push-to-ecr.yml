@@ -19,4 +19,4 @@ jobs:
             create_repo: true
             region: us-east-1
             tags: latest,${{ github.sha }}
-            extra_build_args: --build-arg WANDB_API_KEY="$WANDB_API_KEY" --build-arg WANDB_PROJECT="$WANDB_PROJECT" --build-arg WANDB_USERNAME="$WANDB_USERNAME"
+            extra_build_args: "--build-arg WANDB_API_KEY=$WANDB_API_KEY --build-arg WANDB_PROJECT=$WANDB_PROJECT --build-arg WANDB_USERNAME=$WANDB_USERNAME"
