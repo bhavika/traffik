@@ -4,8 +4,10 @@ import h5py
 from tqdm import tqdm
 import traffik.config as config
 from traffik.logger import logger
-from typing import List, Tuple
+from typing import List, Tuple, Union
 import torch
+import wandb
+from traffik.helpers import data_logger
 
 
 def setup(city: str):
@@ -26,16 +28,14 @@ def setup(city: str):
     return {"output_path": output_path, "node": node_handle, "edge": edge_handle}
 
 
-def build_graph(city: str, mode: str):
+def build_graph(city: str, mode: str, artifact: wandb.Artifact):
     locations = setup(city)
     nodes = np.load(locations["node"])
 
     logger.debug("Start building graph dataset for", city=city, mode=mode)
     raw_data = os.path.join(os.getenv("DATA_DIR"), city, mode)
-
-    hf_handle = h5py.File(
-        os.path.join(locations["output_path"], city, f"{city}_{mode}_5.h5"), "w"
-    )
+    fname = os.path.join(locations["output_path"], city, f"{city}_{mode}_5.h5")
+    hf_handle = h5py.File(fname, "w")
 
     for f in tqdm(os.listdir(raw_data)):
         reader = h5py.File(os.path.join(raw_data, f), "r")
@@ -86,8 +86,13 @@ def get_road_network(source_dir: str, image_size: List, testing: bool, data_type
 
 
 def process_grid(
-    city: str, image_size: List, mode: str, data_type: str, save: bool = True
-) -> np.array:
+    city: str,
+    image_size: List,
+    mode: str,
+    data_type: str,
+    artifact: wandb.Artifact,
+    save: bool = True,
+) -> np.ndarray:
     """
     Builds the road network for a city & data_type (max_volume, avg_total_volume).
     :return: numpy array
@@ -120,34 +125,40 @@ def process_grid(
                 destination=grid_handle,
             )
             np.save(grid_handle, grid)
+            artifact.add_file(grid_handle)
     return grid
 
 
 def combine_grids(
     city, train_grid, validation_grid, test_grid, data_type, save=True
-) -> np.array:
+) -> Union[str, np.ndarray]:
     """
     Combines the training, validation and test grids into one grid.
-    :return:
+    :return: np.ndarray
     """
     grid = np.maximum(train_grid, validation_grid)
     grid = np.maximum(grid, test_grid)
 
     if save:
         fname = f"{city}_roads_{data_type}.npy"
+        output_path = os.path.join(
+            os.getenv("DATA_DIR"), config.INTERMEDIATE_DIR, fname
+        )
         logger.info(
             "[combine_grids] Saving combined grid for ",
             city=city,
             data_type=data_type,
             destination=fname,
         )
-        np.save(
-            os.path.join(os.getenv("DATA_DIR"), config.INTERMEDIATE_DIR, fname), grid
-        )
-    return grid
+        np.save(output_path, grid)
+        return output_path
+    else:
+        return grid
 
 
-def build_static_grid(city: str, image_size: List, mode: str, data_type: str):
+def build_static_grid(
+    city: str, image_size: List, mode: str, data_type: str, artifact: wandb.Artifact
+) -> np.ndarray:
     """
     Calculates overall max volume for each pixel across all channels.
     """
@@ -159,7 +170,7 @@ def build_static_grid(city: str, image_size: List, mode: str, data_type: str):
         "[build_static_grid] Calculating and saving the road network for training data."
     )
 
-    grid = process_grid(city, image_size, mode, data_type, save=True)
+    grid = process_grid(city, image_size, mode, data_type, artifact, save=True)
     road_percentage = (grid != 0).sum() / (image_size[0] * image_size[1])
     logger.info(
         f"[build_static_grid] {mode} images show the road network covers percentage of image",
@@ -168,7 +179,7 @@ def build_static_grid(city: str, image_size: List, mode: str, data_type: str):
     return grid
 
 
-def get_edges_and_unconnected_nodes(node_coordinates: np.array) -> Tuple[List, List]:
+def get_edges_and_unconnected_nodes(node_coordinates: np.ndarray) -> Tuple[List, List]:
     """
     Creates edges and finds unconnected nodes in a set of node coordinates.
     """
@@ -206,7 +217,9 @@ def get_edges_and_unconnected_nodes(node_coordinates: np.array) -> Tuple[List, L
     return edge_idx, unconnected_nodes
 
 
-def build_nodes_edges(city: str, data_type: str, volume_filter: int):
+def build_nodes_edges(
+    city: str, data_type: str, volume_filter: int, artifact: wandb.Artifact
+):
     fname = os.path.join(
         os.getenv("DATA_DIR"),
         config.INTERMEDIATE_DIR,
@@ -218,6 +231,9 @@ def build_nodes_edges(city: str, data_type: str, volume_filter: int):
     filtered_grid = max_volume > volume_filter
     graph_coverage = filtered_grid.sum() / (495 * 436)
     logger.info("Ratio of image covered by road network", ratio=graph_coverage)
+    wandb.config.data_type = data_type
+    wandb.config.volume_filter = volume_filter
+    wandb.config.graph_coverage = graph_coverage
 
     all_node_coordinates = np.array(np.where(filtered_grid)).transpose()
     edge_idx, uncon_nodes = get_edges_and_unconnected_nodes(all_node_coordinates)
@@ -232,6 +248,10 @@ def build_nodes_edges(city: str, data_type: str, volume_filter: int):
     logger.info("Number of nodes", nodes=len(all_node_coordinates))
     logger.info("Number of edges", edges=len(edge_idx[0]))
     logger.info("Number of unconnected nodes", unconnected_nodes=len(uncon_nodes))
+
+    wandb.config.nodes = len(all_node_coordinates)
+    wandb.config.edges = len(edge_idx[0])
+    wandb.config.unconnected_nodes = len(uncon_nodes)
 
     logger.info(f"Saving...")
 
@@ -258,11 +278,15 @@ def build_nodes_edges(city: str, data_type: str, volume_filter: int):
 
     logger.info("Saving nodes to file", file=node_file)
     np.save(node_file, connected_nodes)
+    artifact.add_file(node_file)
     logger.info("Saving edges to file", file=edge_file)
     np.save(edge_file, edge_idx)
+    artifact.add_file(edge_file)
     logger.info("Saving unconnected nodes to file", file=unc_node_file)
     np.save(unc_node_file, uncon_nodes)
+    artifact.add_file(edge_file)
     mask = torch.zeros([495, 436]).byte()
     mask[connected_nodes[:, 0], connected_nodes[:, 1]] = 1
     logger.info("Saving mask to file", file=mask_file)
     torch.save(mask, mask_file)
+    artifact.add_file(mask_file)
