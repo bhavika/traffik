@@ -3,13 +3,13 @@ on: [push]
 jobs:
     build-and-push:
       runs-on: ubuntu-latest
+      env:
+        WANDB_API_KEY: ${{ secrets.WANDB_API_KEY }}
+        WANDB_PROJECT: traffik
+        WANDB_USERNAME: ${{ secrets.WANDB_USERNAME }}
       steps:
         - uses: actions/checkout@v1
         - uses: bhavika/aws-ecr-action@master
-          env:
-            WANDB_API_KEY: ${{ secrets.WANDB_API_KEY }}
-            WANDB_PROJECT: traffik
-            WANDB_USERNAME: ${{ secrets.WANDB_USERNAME }}
           with:
             access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
             secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
