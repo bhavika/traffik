@@ -11,6 +11,9 @@ from traffik.dataset import (
 )
 from dotenv import load_dotenv
 import wandb
+from traffik.GraphEnsembleNet import GraphEnsembleNet
+import torch
+import hiddenlayer as hl
 
 wandb.init(project=os.getenv("WANDB_PROJECT"))
 reproducibility()
@@ -122,3 +125,20 @@ def process(city, data_type, mode, volume_filter):
         build_graph(city, mode, artifact)
 
     run.log_artifact(artifact)
+
+
+@cli.command("draw")
+@click.option(
+    "--network", type=click.Choice(["GraphEnsembleNet", "UNet"], case_sensitive=False)
+)
+def draw(network):
+    if network == "GraphEnsembleNet":
+        hl.build_graph(GraphEnsembleNet, torch.zeros([1, 3, 224, 224]))
+
+        hl.save(os.getcwd())
+
+
+@cli.command("train")
+@click.option()
+def train():
+    pass
