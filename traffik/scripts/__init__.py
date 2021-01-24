@@ -14,6 +14,10 @@ import wandb
 from traffik.GraphEnsembleNet import GraphEnsembleNet
 import torch
 import hiddenlayer as hl
+import numpy as np
+from torch_geometric.data import Data, DataLoader
+from traffik.city_graph_dataset import CityGraphDataset
+
 
 wandb.init(project=os.getenv("WANDB_PROJECT"))
 reproducibility()
@@ -134,11 +138,23 @@ def process(city, data_type, mode, volume_filter):
 def draw(network):
     if network == "GraphEnsembleNet":
         hl.build_graph(GraphEnsembleNet, torch.zeros([1, 3, 224, 224]))
-
         hl.save(os.getcwd())
 
 
 @cli.command("train")
-@click.option()
-def train():
-    pass
+@click.option("--city")
+def train(city):
+    training_ds = CityGraphDataset(
+        os.path.join(os.getenv("DATA_DIR"), config.TRAINING_DIR),
+        os.path.join(os.getenv("DATA_DIR"), config.INTERMEDIATE_DIR),
+        city,
+        forward_mins=np.array([5, 10, 15, 30, 45, 60]),
+        mode=config.VALIDATION_DIR,
+        overlap=False,
+        normalize="Active",
+        full_val=True,
+    )
+
+    training_dl = DataLoader(
+        training_ds, {"batch_size": 1, "shuffle": False, "num_workers": 0}
+    )
