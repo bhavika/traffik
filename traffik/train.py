@@ -1,6 +1,7 @@
 import torch
 from torch import nn
 import pytorch_lightning as pl
+import math
 from traffik.GraphEnsembleNet import GraphEnsembleNet
 from torch.nn import functional as F
 from torch_geometric.nn import (
@@ -23,6 +24,7 @@ from torch_geometric.data import Data, DataLoader
 import os
 import numpy as np
 import traffik.config as config
+from traffik.logger import logger
 from traffik.city_graph_dataset import CityGraphDataset
 
 
@@ -135,19 +137,19 @@ class LightningGEN(pl.LightningModule):
 
     def training_epoch_end(self, outputs):
         avg_loss = torch.stack([x["loss"] for x in outputs]).mean()
-        print(f"Average Training Loss: {avg_loss}")
+        logger.info("Average training Loss", avg_train_loss=avg_loss)
         tensorboard_logs = {"avg_train_loss": avg_loss}
         return {"avg_train_loss": avg_loss, "log": tensorboard_logs}
 
     def validation_epoch_end(self, outputs):
         avg_loss = torch.stack([x["val_loss"] for x in outputs]).mean()
-        print(f"Average Val Loss: {avg_loss}")
+        logger.info("Average validation Loss", avg_val_loss=avg_loss)
         tensorboard_logs = {"avg_val_loss": avg_loss}
         return {"avg_val_loss": avg_loss, "log": tensorboard_logs}
 
     def test_epoch_end(self, outputs):
         avg_loss = torch.stack([x["test_loss"] for x in outputs]).mean()
-        print(f"Average Test Loss: {avg_loss}")
+        logger.info("Average Test Loss", avg_test_loss=avg_loss)
         tensorboard_logs = {"avg_test_loss": avg_loss}
         return {"avg_test_loss": avg_loss, "log": tensorboard_logs}
 
@@ -181,8 +183,6 @@ class LightningGEN(pl.LightningModule):
         return [optimizer], schedulers
 
     def cyclical_lr(self, stepsize, min_lr=3e-4, max_lr=3e-3):
-        import math
-
         # Scaler: we can adapt this if we do not want the triangular CLR
         scaler = lambda x: 1.0
 
