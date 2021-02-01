@@ -17,7 +17,7 @@ import hiddenlayer as hl
 import numpy as np
 from torch_geometric.data import Data, DataLoader
 from traffik.city_graph_dataset import CityGraphDataset
-
+from traffik.train import LightningGEN
 
 wandb.init(project=os.getenv("WANDB_PROJECT"))
 reproducibility()
@@ -144,17 +144,40 @@ def draw(network):
 @cli.command("train")
 @click.option("--city")
 def train(city):
+    forward_mins = np.array([5, 10, 15, 30, 45, 60])
+    pca_static = False
+    normalize = "Active"
+    full_val = True
+    overlap = False
+
     training_ds = CityGraphDataset(
         os.path.join(os.getenv("DATA_DIR"), config.TRAINING_DIR),
         os.path.join(os.getenv("DATA_DIR"), config.INTERMEDIATE_DIR),
         city,
-        forward_mins=np.array([5, 10, 15, 30, 45, 60]),
+        forward_mins=forward_mins,
         mode=config.VALIDATION_DIR,
         overlap=False,
-        normalize="Active",
-        full_val=True,
+        normalize=normalize,
+        full_val=full_val,
     )
 
-    training_dl = DataLoader(
-        training_ds, {"batch_size": 1, "shuffle": False, "num_workers": 0}
+    validation_ds = CityGraphDataset(
+        os.path.join(os.getenv("DATA_DIR"), config.VALIDATION_DIR),
+        os.path.join(os.getenv("DATA_DIR"), config.INTERMEDIATE_DIR),
+        city,
+        forward_mins=forward_mins,
+        mode=config.VALIDATION_DIR,
+        overlap=overlap,
+        normalize=normalize,
+        full_val=full_val,
+        pca_static=pca_static,
+    )
+
+    model = LightningGEN(
+        train_ds=training_ds,
+        validation_ds=validation_ds,
+        forward_mins=np.array([5, 10, 15, 30, 45, 60]),
+        learning_rate=1e-2,
+        overlap=False,
+        full_val=full_val,
     )

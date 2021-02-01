@@ -3,23 +3,7 @@ from torch import nn
 import pytorch_lightning as pl
 import math
 from traffik.GraphEnsembleNet import GraphEnsembleNet
-from torch.nn import functional as F
-from torch_geometric.nn import (
-    GCNConv,
-    NNConv,
-    Set2Set,
-    EdgeConv,
-    GatedGraphConv,
-    GATConv,
-    PNAConv,
-    SAGEConv,
-    SGConv,
-    PointConv,
-    ChebConv,
-)
-from torch_geometric.nn import GraphUNet, global_mean_pool, InstanceNorm, LayerNorm
-from torch.nn import Sequential, Linear, ReLU, GRU, Tanh, Sigmoid, LeakyReLU, ELU
-from torch_geometric.utils import degree
+
 from torch_geometric.data import Data, DataLoader
 import os
 import numpy as np
@@ -31,43 +15,23 @@ from traffik.city_graph_dataset import CityGraphDataset
 class LightningGEN(pl.LightningModule):
     def __init__(
         self,
-        base_dir: str,
-        city: str,
+        train_ds,
+        validation_ds,
         forward_mins: np.array,
         learning_rate: float,
         overlap: bool,
+        full_val: bool,
     ):
         super(LightningGEN, self).__init__()
         self.learning_rate = learning_rate
         self.loss_fn = nn.MSELoss()
         self.batch_size = 2
-        self.pca_static = False
-        self.normalize = "Active"
-        self.full_val = True
+        self.full_val = full_val
+        self.train_ds = train_ds
+        self.validation_ds = validation_ds
+        self.forward_mins = forward_mins
+        self.overlap = overlap
 
-        self.training_ds = CityGraphDataset(
-            os.path.join(os.getenv("DATA_DIR"), config.TRAINING_DIR),
-            os.path.join(os.getenv("DATA_DIR"), config.INTERMEDIATE_DIR),
-            city,
-            forward_mins=forward_mins,
-            mode=config.TRAINING_DIR,
-            overlap=overlap,
-            normalize=self.normalize,
-            full_val=self.full_val,
-            pca_static=self.pca_static,
-        )
-
-        self.validation_ds = CityGraphDataset(
-            os.path.join(os.getenv("DATA_DIR"), config.VALIDATION_DIR),
-            os.path.join(os.getenv("DATA_DIR"), config.INTERMEDIATE_DIR),
-            city,
-            forward_mins=forward_mins,
-            mode=config.VALIDATION_DIR,
-            overlap=overlap,
-            normalize=self.normalize,
-            full_val=self.full_val,
-            pca_static=self.pca_static,
-        )
         self.net = GraphEnsembleNet(
             self.training_ds.num_node_features,
             self.training_ds[0].y.shape[-1],

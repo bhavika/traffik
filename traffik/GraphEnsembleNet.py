@@ -1,7 +1,7 @@
 import torch
-import torch.nn.functional as F
 from torch import nn
 from torch_geometric.nn import ChebConv, LayerNorm, SAGEConv, SGConv
+from torch.nn import functional as F
 
 
 class KipfBlock(torch.nn.Module):
