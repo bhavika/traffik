@@ -25,7 +25,7 @@ instances:
       instanceType: p2.xlarge
       spotInstance: true
       ports: [8888]
-      managedPolicyArns: [arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess]
+      managedPolicyArns: '[arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess]'
       volumes:
         - name: workspace
           parameters:

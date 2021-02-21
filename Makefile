@@ -20,7 +20,7 @@ gpu:
 
 
 lint:
-	black traffik/
+	pre-commit run --all-files
 
 install:
 	source venv/bin/activate \
