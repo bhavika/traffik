@@ -1,7 +1,7 @@
 import click
 import os
 import traffik
-from traffik.helpers import reproducibility
+from traffik.helpers import reproducibility, create_submissions
 import traffik.config as config
 from traffik.dataset import (
     build_graph,
@@ -15,9 +15,10 @@ from traffik.GraphEnsembleNet import GraphEnsembleNet
 import torch
 import hiddenlayer as hl
 import numpy as np
-from torch_geometric.data import Data, DataLoader
 from traffik.city_graph_dataset import CityGraphDataset
 from traffik.train import LightningGEN
+import pytorch_lightning as pl
+
 
 wandb.init(project=os.getenv("WANDB_PROJECT"))
 reproducibility()
@@ -181,3 +182,8 @@ def train(city):
         overlap=False,
         full_val=full_val,
     )
+
+    trainer = pl.Trainer(max_epochs=20)
+    trainer.fit(model)
+
+    create_submissions(model=model, city=city, dataset=validation_ds)

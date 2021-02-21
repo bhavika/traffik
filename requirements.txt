@@ -3,7 +3,6 @@ pytest
 wandb
 boto3
 spotty
-torch-geometric
 python-dotenv
 click
 structlog
@@ -12,3 +11,4 @@ setuptools
 hiddenlayer
 ipython
 pytorch-lightning
+torch-geometric

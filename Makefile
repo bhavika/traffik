@@ -1,4 +1,4 @@
-.PHONY: hello cpu gpu venv lint
+.PHONY: hello cpu gpu lint test run
 SHELL := /bin/bash
 
 hello:
@@ -18,8 +18,18 @@ gpu:
   	--build-arg WANDB_PROJECT=${WANDB_PROJECT} \
 	--build-arg WANDB_USERNAME=${WANDB_USERNAME} .
 
-venv:
-	source venv/bin/activate
 
 lint:
 	black traffik/
+
+install:
+	source venv/bin/activate \
+	pip install .
+
+test:
+	source venv/bin/activate \
+	pip install . \
+	pytest -v tests/
+
+local:
+	docker run -it traffik:cpu /bin/bash

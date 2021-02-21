@@ -1,8 +1,9 @@
 language: python
 python:
   - "3.8"
-install:
-  - "python -m pip install -r requirements.txt"
-  - "python -m pip install --no-cache -e .[test]"
+services:
+  - docker
+before_install:
+  - make cpu
 script:
-  pytest -s
+  - make test
