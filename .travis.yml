@@ -3,7 +3,5 @@ python:
   - "3.8"
 services:
   - docker
-before_install:
-  - make cpu
 script:
   - make test

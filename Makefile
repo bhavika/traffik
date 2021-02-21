@@ -33,3 +33,6 @@ test:
 
 local:
 	docker run -it traffik:cpu /bin/bash
+
+test-docker: cpu
+	docker run -it traffik:cpu make test
