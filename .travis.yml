@@ -4,4 +4,4 @@ python:
 services:
   - docker
 script:
-  - make test
+  - make test-docker
