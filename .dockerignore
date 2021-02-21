@@ -3,3 +3,8 @@ venv/
 .env
 images/
 wandb/
+.github/
+.ipynb_checkpoints/
+.pytest_cache/
+.vscode/
+traffik.egg-info/

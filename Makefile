@@ -1,9 +1,38 @@
+.PHONY: hello cpu gpu lint test run
+SHELL := /bin/bash
+
 hello:
 	echo "hello world"
 
-build:
+cpu:
 	docker build \
-	-t traffik:gpu \
+	-t traffik:cpu \
 	--build-arg WANDB_API_KEY=${WANDB_API_KEY} \
 	--build-arg WANDB_PROJECT=${WANDB_PROJECT} \
 	--build-arg WANDB_USERNAME=${WANDB_USERNAME} .
+
+gpu:
+	docker build -f Dockerfile.gpu \
+	-t traffik:gpu \
+	--build-arg WANDB_API_KEY=${WANDB_API_KEY} \
+  	--build-arg WANDB_PROJECT=${WANDB_PROJECT} \
+	--build-arg WANDB_USERNAME=${WANDB_USERNAME} .
+
+
+lint:
+	pre-commit run --all-files
+
+install:
+	source venv/bin/activate \
+	pip install .
+
+test:
+	source venv/bin/activate \
+	pip install . \
+	pytest -vv tests/
+
+local:
+	docker run -it traffik:cpu /bin/bash
+
+test-docker: cpu
+	docker run -it traffik:cpu make test

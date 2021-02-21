@@ -23,12 +23,14 @@ RUN source activate venv
 
 COPY requirements.txt /app/requirements.txt
 
-RUN pip install torch-scatter torch-sparse torch-cluster torch-spline-conv -f https://pytorch-geometric.com/whl/torch-1.7.0+cu110.html -r /app/requirements.txt
+RUN pip install torch-scatter torch-sparse torch-cluster torch-spline-conv -f https://pytorch-geometric.com/whl/torch-1.7.0+cu110.html \
+    && pip install -r /app/requirements.txt
 
 RUN mkdir models
 RUN mkdir output
 
 COPY traffik /app/traffik
+COPY data /app/data
 COPY setup.py /app/setup.py
 
 WORKDIR /app

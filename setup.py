@@ -1,4 +1,5 @@
 from setuptools import setup, find_packages
+import os
 
 with open("traffik/__init__.py") as f:
     for line in f:

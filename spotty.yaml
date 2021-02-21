@@ -6,6 +6,10 @@ project:
       - .idea/*
       - '*/__pycache__/*'
       - venv/*
+      - wandb/
+      - .vscode/
+      - .github/
+      - .ipynb_checkpoints/
 
 containers:
   - projectDir: /workspace/traffik
@@ -25,7 +29,7 @@ instances:
       instanceType: p2.xlarge
       spotInstance: true
       ports: [8888]
-      managedPolicyArns: [arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess]
+      managedPolicyArns: ['arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess']
       volumes:
         - name: workspace
           parameters:

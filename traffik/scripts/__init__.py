@@ -1,7 +1,7 @@
 import click
 import os
 import traffik
-from traffik.helpers import reproducibility
+from traffik.helpers import reproducibility, create_submissions
 import traffik.config as config
 from traffik.dataset import (
     build_graph,
@@ -11,6 +11,14 @@ from traffik.dataset import (
 )
 from dotenv import load_dotenv
 import wandb
+from traffik.GraphEnsembleNet import GraphEnsembleNet
+import torch
+import hiddenlayer as hl
+import numpy as np
+from traffik.city_graph_dataset import CityGraphDataset
+from traffik.train import LightningGEN
+import pytorch_lightning as pl
+
 
 wandb.init(project=os.getenv("WANDB_PROJECT"))
 reproducibility()
@@ -122,3 +130,60 @@ def process(city, data_type, mode, volume_filter):
         build_graph(city, mode, artifact)
 
     run.log_artifact(artifact)
+
+
+@cli.command("draw")
+@click.option(
+    "--network", type=click.Choice(["GraphEnsembleNet", "UNet"], case_sensitive=False)
+)
+def draw(network):
+    if network == "GraphEnsembleNet":
+        hl.build_graph(GraphEnsembleNet, torch.zeros([1, 3, 224, 224]))
+        hl.save(os.getcwd())
+
+
+@cli.command("train")
+@click.option("--city")
+def train(city):
+    forward_mins = np.array([5, 10, 15, 30, 45, 60])
+    pca_static = False
+    normalize = "Active"
+    full_val = True
+    overlap = False
+
+    training_ds = CityGraphDataset(
+        os.path.join(os.getenv("DATA_DIR"), config.TRAINING_DIR),
+        os.path.join(os.getenv("DATA_DIR"), config.INTERMEDIATE_DIR),
+        city,
+        forward_mins=forward_mins,
+        mode=config.VALIDATION_DIR,
+        overlap=False,
+        normalize=normalize,
+        full_val=full_val,
+    )
+
+    validation_ds = CityGraphDataset(
+        os.path.join(os.getenv("DATA_DIR"), config.VALIDATION_DIR),
+        os.path.join(os.getenv("DATA_DIR"), config.INTERMEDIATE_DIR),
+        city,
+        forward_mins=forward_mins,
+        mode=config.VALIDATION_DIR,
+        overlap=overlap,
+        normalize=normalize,
+        full_val=full_val,
+        pca_static=pca_static,
+    )
+
+    model = LightningGEN(
+        train_ds=training_ds,
+        validation_ds=validation_ds,
+        forward_mins=np.array([5, 10, 15, 30, 45, 60]),
+        learning_rate=1e-2,
+        overlap=False,
+        full_val=full_val,
+    )
+
+    trainer = pl.Trainer(max_epochs=20)
+    trainer.fit(model)
+
+    create_submissions(model=model, city=city, dataset=validation_ds)
