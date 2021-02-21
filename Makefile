@@ -29,7 +29,7 @@ install:
 test:
 	source venv/bin/activate \
 	pip install . \
-	pytest -v tests/
+	pytest -vv tests/
 
 local:
 	docker run -it traffik:cpu /bin/bash
